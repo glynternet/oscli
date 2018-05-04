@@ -6,7 +6,6 @@ import (
 	"net"
 	"os"
 
-	"github.com/Pocketbrain/go-logger"
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -56,7 +55,7 @@ func init() {
 	relayCmd.Flags().Uint(keyForwardPort, 9000, "forwarding port number")
 	err := viper.BindPFlags(relayCmd.Flags())
 	if err != nil {
-		plog.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
