@@ -1,5 +1,6 @@
 builds:
   - binary: oscli
+    main: ./cmd/oscli/main.go
     goos:
       - windows
       - darwin
