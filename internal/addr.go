@@ -11,6 +11,12 @@ import (
 
 const localhost = "localhost"
 
+// GetRemoteHost will return remote host address based on whether localMode
+// is set to true or whether it has been set in the environment. If neither
+// are set, GetRemoteHost will request a remote address from the terminal
+// user.
+// GetRemoteHost will return an error if both localMode and a host in the
+// environment are set.
 func GetRemoteHost(localMode bool, envHost string) (string, error) {
 	if localMode {
 		if envHost != "" {
@@ -24,6 +30,20 @@ func GetRemoteHost(localMode bool, envHost string) (string, error) {
 	var err error
 	envHost, err = readRemoteAddress(bufio.NewReader(os.Stdin))
 	return envHost, errors.Wrap(err, "reading remote address")
+}
+
+// CleanAddress will ensure that the given address is in a format that is
+// suitable for OSC messaging, appending a / before the address if there isn't
+// one already.
+func CleanAddress(addr string) (string, error) {
+	msgAddr := addr
+	if len(msgAddr) == 0 {
+		return "", errors.New("address must be non-zero length")
+	}
+	if msgAddr[0] != '/' {
+		msgAddr = "/" + msgAddr
+	}
+	return msgAddr, nil
 }
 
 type stringReader interface {

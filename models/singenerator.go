@@ -4,8 +4,8 @@ import (
 	"math"
 	"time"
 
-	osc2 "github.com/glynternet/oscli/pkg/osc"
 	gmath "github.com/glynternet/math"
+	osc2 "github.com/glynternet/oscli/pkg/osc"
 	"github.com/hypebeast/go-osc/osc"
 )
 

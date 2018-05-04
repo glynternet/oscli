@@ -20,7 +20,7 @@ var cmdSend = &cobra.Command{
 		if len(args) < 2 {
 			return fmt.Errorf("expects at least 2 arguments, address and message parts. Received %d", len(args))
 		}
-		msgAddr, err := osc.CleanAddress(args[0])
+		msgAddr, err := internal.CleanAddress(args[0])
 		if err != nil {
 			return errors.Wrap(err, "parsing OSC message address")
 		}
