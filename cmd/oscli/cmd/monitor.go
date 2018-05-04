@@ -7,7 +7,6 @@ import (
 	"net"
 	"os"
 
-	"github.com/Pocketbrain/go-logger"
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -84,6 +83,6 @@ func init() {
 	rootCmd.AddCommand(cmdMonitor)
 	err := viper.BindPFlags(cmdMonitor.Flags())
 	if err != nil {
-		plog.Fatal(err)
+		log.Fatal(err)
 	}
 }

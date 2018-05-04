@@ -7,7 +7,6 @@ import (
 
 	"github.com/glynternet/oscli/internal"
 	"github.com/glynternet/oscli/pkg/osc"
-	"github.com/Pocketbrain/go-logger"
 	osc2 "github.com/hypebeast/go-osc/osc"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -60,6 +59,6 @@ func init() {
 	rootCmd.AddCommand(cmdSend)
 	err := viper.BindPFlags(cmdSend.Flags())
 	if err != nil {
-		plog.Fatal(err)
+		log.Fatal(err)
 	}
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/glynternet/oscli/models"
 	osc2 "github.com/glynternet/oscli/pkg/osc"
 	"github.com/glynternet/oscli/pkg/wave"
-	"github.com/Pocketbrain/go-logger"
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -89,6 +88,6 @@ func init() {
 	cmdOSCGen.Flags().Float64P(keyWaveFrequency, "f", 1, "frequency of generated signal")
 	err := viper.BindPFlags(cmdOSCGen.Flags())
 	if err != nil {
-		plog.Fatal(err)
+		log.Fatal(err)
 	}
 }
