@@ -3,10 +3,10 @@ package cmd
 import (
 	"strings"
 
-	"github.com/Pocketbrain/go-logger"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"log"
 )
 
 const (
@@ -35,7 +35,7 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	cobra.OnInitialize(initConfig)
 	if err := rootCmd.Execute(); err != nil {
-		plog.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
@@ -47,7 +47,7 @@ func init() {
 	rootCmd.PersistentFlags().Uint(keyRemotePort, 9000, usageRemotePort)
 	err := viper.BindPFlags(rootCmd.PersistentFlags())
 	if err != nil {
-		plog.Fatal(errors.Wrap(err, "binding PFlags"))
+		log.Fatal(errors.Wrap(err, "binding PFlags"))
 	}
 }
 
