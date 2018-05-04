@@ -21,7 +21,7 @@ const (
 )
 
 var cmdOSCGen = &cobra.Command{
-	Use:   "gen",
+	Use:   "generate",
 	Short: "generate a stream of osc messages",
 	Long: `generate a stream of osc messages
 
@@ -31,7 +31,7 @@ The messages will be sent to the given address.`,
 		if len(args) == 0 {
 			return errors.New("arguments required to form OSC message")
 		}
-		msgAddr, err := osc2.CleanAddress(args[0])
+		msgAddr, err := internal.CleanAddress(args[0])
 		if err != nil {
 			return errors.Wrap(err, "parsing OSC message address")
 		}
