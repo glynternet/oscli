@@ -5,8 +5,8 @@ import (
 	"log"
 	"net"
 
-	"bitbucket.org/glynny/avva-http/internal"
-	"bitbucket.org/glynny/avva-http/pkg/osc"
+	"github.com/glynternet/oscli/internal"
+	"github.com/glynternet/oscli/pkg/osc"
 	"github.com/Pocketbrain/go-logger"
 	osc2 "github.com/hypebeast/go-osc/osc"
 	"github.com/pkg/errors"

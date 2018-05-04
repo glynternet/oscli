@@ -14,7 +14,7 @@
 
 package main
 
-import "bitbucket.org/glynny/avva-http/cmd/osc/cmd"
+import "github.com/glynternet/oscli/cmd/oscli/cmd"
 
 func main() {
 	cmd.Execute()
