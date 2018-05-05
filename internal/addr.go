@@ -36,9 +36,12 @@ func GetRemoteHost(localMode bool, envHost string) (string, error) {
 // suitable for OSC messaging, appending a / before the address if there isn't
 // one already.
 func CleanAddress(addr string) (string, error) {
-	msgAddr := addr
+	msgAddr := strings.TrimSpace(addr)
 	if len(msgAddr) == 0 {
 		return "", errors.New("address must be non-zero length")
+	}
+	if strings.ContainsAny(addr, "\n\t\r ") {
+		return "", errors.New("cannot contain whitespace")
 	}
 	if msgAddr[0] != '/' {
 		msgAddr = "/" + msgAddr
