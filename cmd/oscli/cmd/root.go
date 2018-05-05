@@ -1,19 +1,17 @@
-package main
+package cmd
 
 import (
 	"log"
 	"strings"
 
-	"github.com/glynternet/oscli/cmd/oscli/cmd"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-func main() {
-	if err := cmd.Execute(); err != nil {
-		log.Fatal(err)
-	}
+func Execute() error {
+	cobra.OnInitialize(initConfig)
+	return rootCmd.Execute()
 }
 
 const (
