@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/glynternet/oscli/internal"
-	"github.com/glynternet/oscli/models"
 	osc2 "github.com/glynternet/oscli/pkg/osc"
 	"github.com/glynternet/oscli/pkg/wave"
 	"github.com/hypebeast/go-osc/osc"
@@ -14,19 +13,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	keyMsgFrequency  = "msg-freq"
-	keyWaveFrequency = "wave-freq"
-)
-
-var cmdOSCGen = &cobra.Command{
-	Use:   "generate [ADDRESS] [MESSAGE]...",
-	Short: "generate a stream of osc messages",
-	Long: `generate a stream of osc messages
-
-Generate an osc signal with values ranging from 0 to 1 as a sin wave.
-The messages will be sent to the given address.`,
-	Args: cobra.MinimumNArgs(2),
+var cmdMetro = &cobra.Command{
+	Use:   "metro [ADDRESS] [MESSAGE]...",
+	Short: "generate a ticker of the same OSC message",
+	Args:  cobra.MinimumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		msgAddr, err := internal.CleanAddress(args[0])
 		if err != nil {
@@ -59,7 +49,9 @@ The messages will be sent to the given address.`,
 			}
 		}
 
-		genFn := models.NowSinNormalised(msgAddr, staticArgs, viper.GetFloat64(keyWaveFrequency))
+		genFn := func() *osc.Message {
+			return osc.NewMessage(msgAddr, staticArgs...)
+		}
 
 		// TODO: the second argument to this could be a ticker or something?
 		msgCh := osc2.Generate(genFn, wave.Frequency(msgFreq).Period())
@@ -78,10 +70,8 @@ The messages will be sent to the given address.`,
 }
 
 func init() {
-	rootCmd.AddCommand(cmdOSCGen)
-	cmdOSCGen.Flags().Float64P(keyMsgFrequency, "m", 25, "frequency to send messages at")
-	cmdOSCGen.Flags().Float64P(keyWaveFrequency, "f", 1, "frequency of generated signal")
-	err := viper.BindPFlags(cmdOSCGen.Flags())
+	rootCmd.AddCommand(cmdMetro)
+	err := viper.BindPFlags(cmdMetro.Flags())
 	if err != nil {
 		log.Fatal(err)
 	}

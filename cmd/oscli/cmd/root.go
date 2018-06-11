@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"log"
+	"net"
 	"strings"
 
+	"github.com/glynternet/oscli/internal"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -15,7 +17,7 @@ func Execute() error {
 }
 
 const (
-	appName = "osc"
+	appName = "oscli"
 
 	keyListenHost   = "listen-host"
 	usageListenHost = "host address to listen on"
@@ -43,6 +45,9 @@ func init() {
 	rootCmd.PersistentFlags().Uint(keyListenPort, 9000, usageListenPort)
 	rootCmd.PersistentFlags().StringP(keyRemoteHost, "r", "", usageRemoteHost)
 	rootCmd.PersistentFlags().Uint(keyRemotePort, 9000, usageRemotePort)
+
+	rootCmd.PersistentFlags().Float64P(keyMsgFrequency, "m", 25, "frequency to send messages at")
+
 	err := viper.BindPFlags(rootCmd.PersistentFlags())
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "binding PFlags"))
@@ -53,4 +58,23 @@ func init() {
 func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+}
+
+func initRemoteHost() (string, error) {
+	host, err := internal.GetRemoteHost(
+		viper.GetBool(keyLocal),
+		viper.GetString(keyRemoteHost),
+	)
+	if err != nil {
+		return "", errors.Wrap(err, "getting remote host")
+	}
+
+	return host, errors.Wrap(verifyHost(host), "verifying host")
+}
+
+// verifyHost checks that the given string can be resolved through the current
+// DNS/networking state
+func verifyHost(host string) error {
+	_, err := net.LookupHost(host)
+	return errors.Wrapf(err, "looking up %s host %s", keyRemoteHost, host)
 }

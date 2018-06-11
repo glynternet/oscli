@@ -17,7 +17,7 @@ func main() {
 }
 
 const (
-	appName = "osc"
+	appName = "oscli"
 
 	keyListenHost   = "listen-host"
 	usageListenHost = "host address to listen on"
@@ -40,6 +40,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
+	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().BoolP(keyLocal, "l", false, usageLocal)
 	rootCmd.PersistentFlags().String(keyListenHost, "", usageListenHost)
 	rootCmd.PersistentFlags().Uint(keyListenPort, 9000, usageListenPort)
