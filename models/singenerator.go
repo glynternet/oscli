@@ -5,7 +5,7 @@ import (
 	"time"
 
 	gmath "github.com/glynternet/math"
-	osc2 "github.com/glynternet/oscli/pkg/osc"
+	osc3 "github.com/glynternet/oscli/internal/osc"
 	"github.com/hypebeast/go-osc/osc"
 )
 
@@ -13,7 +13,7 @@ import (
 // message formed with the address and static arguments, appended with the
 // value of sin at the time, with a phase calculated as if the epoch was a
 // phase of zero, with a frequency freq.
-func NowSinNormalised(msgAddr string, staticArgs []interface{}, freq float64) osc2.MsgGenFunc {
+func NowSinNormalised(msgAddr string, staticArgs []interface{}, freq float64) osc3.MsgGenFunc {
 	// TODO: revise this documentation
 	floatFn := sinNowNormalised(freq)
 	return func() *osc.Message {

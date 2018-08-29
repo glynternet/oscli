@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/glynternet/oscli/internal"
+	osc3 "github.com/glynternet/oscli/internal/osc"
 	osc2 "github.com/glynternet/oscli/pkg/osc"
 	"github.com/glynternet/oscli/pkg/wave"
 	"github.com/hypebeast/go-osc/osc"
@@ -18,7 +18,7 @@ var cmdMetro = &cobra.Command{
 	Short: "generate a ticker of the same OSC message",
 	Args:  cobra.MinimumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		msgAddr, err := internal.CleanAddress(args[0])
+		msgAddr, err := osc2.CleanAddress(args[0])
 		if err != nil {
 			return errors.Wrap(err, "parsing OSC message address")
 		}
@@ -41,7 +41,7 @@ var cmdMetro = &cobra.Command{
 		var staticArgs []interface{}
 		if len(args) > 0 {
 			for _, arg := range args[1:] {
-				a, err := osc2.Parse(arg)
+				a, err := osc3.Parse(arg)
 				if err != nil {
 					return errors.Wrapf(err, "parsing arg '%s' as value", arg)
 				}
@@ -54,7 +54,7 @@ var cmdMetro = &cobra.Command{
 		}
 
 		// TODO: the second argument to this could be a ticker or something?
-		msgCh := osc2.Generate(genFn, wave.Frequency(msgFreq).Period())
+		msgCh := osc3.Generate(genFn, wave.Frequency(msgFreq).Period())
 		for {
 			select {
 			case msg := <-msgCh:

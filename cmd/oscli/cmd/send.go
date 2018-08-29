@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	osc3 "github.com/glynternet/oscli/internal/osc"
 	"log"
 	"net"
 
@@ -20,14 +21,14 @@ var cmdSend = &cobra.Command{
 		if len(args) < 2 {
 			return fmt.Errorf("expects at least 2 arguments, address and message parts. Received %d", len(args))
 		}
-		msgAddr, err := internal.CleanAddress(args[0])
+		msgAddr, err := osc.CleanAddress(args[0])
 		if err != nil {
 			return errors.Wrap(err, "parsing OSC message address")
 		}
 		msg := osc2.NewMessage(msgAddr)
 
 		for _, val := range args[1:] {
-			app, err := osc.Parse(val)
+			app, err := osc3.Parse(val)
 			if err != nil {
 				return errors.Wrap(err, "parsing message argument")
 			}

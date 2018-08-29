@@ -17,7 +17,7 @@ func TestParse(t *testing.T) {
 	}{
 		{
 			name:  "zero-values",
-			error: osc.EmptyValueError,
+			error: EmptyValueError,
 		},
 		{
 			name:     "string value",
