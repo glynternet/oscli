@@ -1,4 +1,4 @@
-package osc_test
+package osc
 
 import (
 	"fmt"
