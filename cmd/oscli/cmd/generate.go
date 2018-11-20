@@ -40,7 +40,7 @@ The messages will be sent to the given address.`,
 
 		client := hosc.NewClient(
 			host,
-			viper.GetInt(keyRemotePort),
+			int(remotePort),
 		)
 
 		msgFreq := viper.GetFloat64(keyMsgFrequency)
