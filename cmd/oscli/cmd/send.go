@@ -8,7 +8,7 @@ import (
 
 	"github.com/glynternet/oscli/internal"
 	"github.com/glynternet/oscli/pkg/osc"
-	osc2 "github.com/hypebeast/go-osc/osc"
+	osc2 "github.com/sander/go-osc/osc"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

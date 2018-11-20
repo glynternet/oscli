@@ -3,7 +3,7 @@ package osc
 import (
 	"time"
 
-	"github.com/hypebeast/go-osc/osc"
+	"github.com/sander/go-osc/osc"
 )
 
 // Generate will call the MsgGenFunc periodically after every period given by

@@ -26,12 +26,6 @@
   revision = "ef8a98b0bbce4a65b5aa4c368430a80ddc533168"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/hypebeast/go-osc"
-  packages = ["osc"]
-  revision = "592fa95c06c9545c783966963785f74e4a088d6a"
-
-[[projects]]
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
@@ -66,6 +60,12 @@
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/sander/go-osc"
+  packages = ["osc"]
+  revision = "eff85665dd5a950ab002a1c3841449300e8ae9f3"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -130,6 +130,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dee5227c3d0986034ce343b252d2b85aee811ba53f058821e2a2380322d25201"
+  inputs-digest = "558a8ccb7a1a4495b439fb8284cf033196bcf172a0a117d0db58f6b1c3adab1d"
   solver-name = "gps-cdcl"
   solver-version = 1

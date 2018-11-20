@@ -6,7 +6,7 @@ import (
 
 	gmath "github.com/glynternet/math"
 	osc3 "github.com/glynternet/oscli/internal/osc"
-	"github.com/hypebeast/go-osc/osc"
+	"github.com/sander/go-osc/osc"
 )
 
 // NowSinNormalised returns a MsgGenFunc that, when called, will return a
