@@ -13,7 +13,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-const keyNoInput = "no-input"
+const (
+	keyNoInput = "no-input"
+	keyDecodeBlob = "decode-blobs"
+)
 
 var cmdMonitor = &cobra.Command{
 	Use:   "monitor",
@@ -37,10 +40,13 @@ var cmdMonitor = &cobra.Command{
 			go startQuitterReader(bufio.NewReader(os.Stdin))
 		}
 
+		print := getPrinter(viper.GetBool(keyDecodeBlob))
+
 		fmt.Println("Listening on", addr)
+		srv := &osc.Server{}
 
 		for {
-			packet, err := (&osc.Server{}).ReceivePacket(conn)
+			packet, err := srv.ReceivePacket(conn)
 			if err != nil {
 				fmt.Println("Server error: " + err.Error())
 				// TODO: add a flag to exit on error instead of loop?
@@ -54,20 +60,40 @@ var cmdMonitor = &cobra.Command{
 
 				case *osc.Message:
 					fmt.Printf("-- OSC Message: ")
-					osc.PrintMessage(packet.(*osc.Message))
+					print(packet.(*osc.Message))
 
 				case *osc.Bundle:
 					fmt.Println("-- OSC Bundle:")
 					bundle := packet.(*osc.Bundle)
 					for i, message := range bundle.Messages {
 						fmt.Printf("  -- OSC Message #%d: ", i+1)
-						osc.PrintMessage(message)
+						print(message)
 					}
 				}
 			}
 		}
 
 	},
+}
+
+func getPrinter(decodeBlobs bool) func(*osc.Message) {
+	if decodeBlobs {
+		return decodedBlobsPrint
+	}
+	return rawPrint
+}
+
+func rawPrint(msg *osc.Message) {
+	fmt.Println(msg)
+}
+
+func decodedBlobsPrint(msg *osc.Message) {
+	fmt.Println(msg)
+	for i, a := range msg.Arguments {
+		if bs, ok := a.([]byte); ok {
+			fmt.Printf("element[%d]: %s\n", i, string(bs))
+		}
+	}
 }
 
 type byteReader interface {
@@ -91,6 +117,7 @@ func startQuitterReader(r byteReader) {
 func init() {
 	rootCmd.AddCommand(cmdMonitor)
 	cmdMonitor.Flags().Bool(keyNoInput, false, "turn on no-input mode for when no terminal is available")
+	cmdMonitor.Flags().Bool(keyDecodeBlob, false, "decode blob values into strings")
 	err := viper.BindPFlags(cmdMonitor.Flags())
 	if err != nil {
 		log.Fatal(err)
