@@ -37,7 +37,7 @@ var cmdSend = &cobra.Command{
 
 		host, err := internal.GetRemoteHost(
 			viper.GetBool(keyLocal),
-			viper.GetString(keyRemoteHost),
+			remoteHost,
 		)
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "getting remote host"))
@@ -45,13 +45,15 @@ var cmdSend = &cobra.Command{
 
 		_, err = net.LookupHost(host)
 		if err != nil {
-			log.Fatal(errors.Wrapf(err, "looking up %s host %s", keyRemoteHost, host))
+			log.Fatal(errors.Wrapf(err, "looking up host %s on network", host))
 		}
+		port := int(remotePort)
 		client := osc2.NewClient(
 			host,
-			viper.GetInt(keyRemotePort),
+			port,
 		)
-		fmt.Printf("sending: %v\n", msg)
+		addr := fmt.Sprintf("%s:%d", host, port)
+		fmt.Printf("sending to %s: %v\n", addr, msg)
 		return client.Send(msg)
 	},
 }

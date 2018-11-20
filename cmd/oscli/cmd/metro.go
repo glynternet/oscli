@@ -30,7 +30,7 @@ var cmdMetro = &cobra.Command{
 
 		client := osc.NewClient(
 			host,
-			viper.GetInt(keyRemotePort),
+			int(remotePort),
 		)
 
 		msgFreq := viper.GetFloat64(keyMsgFrequency)
