@@ -25,15 +25,6 @@ var cmdSend = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "parsing OSC message address")
 		}
-		msg := osc2.NewMessage(msgAddr)
-
-		for _, val := range args[1:] {
-			app, err := osc3.Parse(val)
-			if err != nil {
-				return errors.Wrap(err, "parsing message argument")
-			}
-			msg.Append(app)
-		}
 
 		host, err := internal.GetRemoteHost(
 			viper.GetBool(keyLocal),
@@ -52,6 +43,15 @@ var cmdSend = &cobra.Command{
 			host,
 			port,
 		)
+
+		msg := osc2.NewMessage(msgAddr)
+		for _, val := range args[1:] {
+			app, err := osc3.Parse(val)
+			if err != nil {
+				return errors.Wrap(err, "parsing message argument")
+			}
+			msg.Append(app)
+		}
 		err = client.Send(msg)
 		if err != nil {
 			return errors.Wrapf(err, "sending msg:%v using client:%v", *msg, *client)
