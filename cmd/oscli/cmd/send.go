@@ -52,9 +52,13 @@ var cmdSend = &cobra.Command{
 			host,
 			port,
 		)
+		err = client.Send(msg)
+		if err != nil {
+			return errors.Wrapf(err, "sending msg:%v using client:%v", *msg, *client)
+		}
 		addr := fmt.Sprintf("%s:%d", host, port)
 		fmt.Printf("sending to %s: %v\n", addr, msg)
-		return client.Send(msg)
+		return nil
 	},
 }
 
