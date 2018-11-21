@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	osc3 "github.com/glynternet/oscli/internal/osc"
 	"log"
 	"net"
 
 	"github.com/glynternet/oscli/internal"
+	osc3 "github.com/glynternet/oscli/internal/osc"
 	"github.com/glynternet/oscli/pkg/osc"
-	osc2 "github.com/sander/go-osc/osc"
 	"github.com/pkg/errors"
+	osc2 "github.com/sander/go-osc/osc"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

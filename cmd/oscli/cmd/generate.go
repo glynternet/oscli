@@ -8,8 +8,8 @@ import (
 	"github.com/glynternet/oscli/models"
 	"github.com/glynternet/oscli/pkg/osc"
 	"github.com/glynternet/oscli/pkg/wave"
-	hosc "github.com/sander/go-osc/osc"
 	"github.com/pkg/errors"
+	hosc "github.com/sander/go-osc/osc"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
