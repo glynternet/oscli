@@ -40,12 +40,12 @@ var cmdSend = &cobra.Command{
 			remoteHost,
 		)
 		if err != nil {
-			log.Fatal(errors.Wrap(err, "getting remote host"))
+			return errors.Wrap(err, "getting remote host")
 		}
 
 		_, err = net.LookupHost(host)
 		if err != nil {
-			log.Fatal(errors.Wrapf(err, "looking up host %s on network", host))
+			return errors.Wrapf(err, "looking up host %s on network", host)
 		}
 		port := int(remotePort)
 		client := osc2.NewClient(
