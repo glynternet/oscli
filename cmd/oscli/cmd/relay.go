@@ -6,8 +6,8 @@ import (
 	"net"
 	"os"
 
-	"github.com/sander/go-osc/osc"
 	"github.com/pkg/errors"
+	"github.com/sander/go-osc/osc"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
