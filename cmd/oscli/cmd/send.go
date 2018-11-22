@@ -14,6 +14,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+const keyAsBlob = "as-blob"
+
 var cmdSend = &cobra.Command{
 	Use:   "send",
 	Short: "send a single OSC message",
@@ -45,8 +47,9 @@ var cmdSend = &cobra.Command{
 		)
 
 		msg := osc2.NewMessage(msgAddr)
+		parse := getParser(viper.GetBool(keyAsBlob))
 		for _, val := range args[1:] {
-			app, err := osc3.Parse(val)
+			app, err := parse(val)
 			if err != nil {
 				return errors.Wrap(err, "parsing message argument")
 			}
@@ -62,7 +65,23 @@ var cmdSend = &cobra.Command{
 	},
 }
 
+type argParser func(arg string) interface{}
+
+// blobParse will convert any string argument to a []byte so that it will be sent
+// as a blob argument
+func blobParse(arg string) (interface{}, error) {
+	return []byte(arg), nil
+}
+
+func getParser(asBlobs bool) func(string) (interface{}, error) {
+	if asBlobs {
+		return blobParse
+	}
+	return osc3.Parse
+}
+
 func init() {
+	cmdSend.Flags().Bool(keyAsBlob, false, "send all arguments as blobs")
 	rootCmd.AddCommand(cmdSend)
 	err := viper.BindPFlags(cmdSend.Flags())
 	if err != nil {
