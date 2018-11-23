@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/glynternet/oscli/internal"
+	"github.com/glynternet/oscli/internal/osc"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,6 +33,8 @@ const (
 var (
 	remoteHost string
 	remotePort uint
+
+	asBlob bool
 )
 
 var rootCmd = &cobra.Command{
@@ -45,6 +48,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&remoteHost, "remote-host", "r", "", "address to send any messages to")
 	rootCmd.PersistentFlags().UintVar(&remotePort, "remote-port", 9000, "port of the remote host to send any messages to")
 
+	rootCmd.Flags().BoolVar(&asBlob, "as-blob", false, "send all arguments as blobs (in monitor and send subcommands)")
 	rootCmd.PersistentFlags().Float64P(keyMsgFrequency, "m", 25, "frequency to send messages at")
 
 	err := viper.BindPFlags(rootCmd.PersistentFlags())
@@ -76,4 +80,11 @@ func initRemoteHost() (string, error) {
 func verifyHost(host string) error {
 	_, err := net.LookupHost(host)
 	return errors.Wrapf(err, "looking up host %s on network", host)
+}
+
+func getParser(asBlobs bool) func(string) (interface{}, error) {
+	if asBlobs {
+		return osc.BlobParse
+	}
+	return osc.Parse
 }

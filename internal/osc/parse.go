@@ -30,6 +30,15 @@ func Parse(val string) (interface{}, error) {
 	return val, nil
 }
 
+// BlobParse will convert any string argument to a []byte so that it will be sent
+// as a blob argument
+func BlobParse(val string) (interface{}, error) {
+	if val == "" {
+		return nil, EmptyValueError
+	}
+	return []byte(val), nil
+}
+
 // ParseError is an error type that can be returned when there is an issue with
 // parsing a string value in order to turn it into an osc.Message.
 type ParseError string

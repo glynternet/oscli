@@ -6,15 +6,12 @@ import (
 	"net"
 
 	"github.com/glynternet/oscli/internal"
-	osc3 "github.com/glynternet/oscli/internal/osc"
 	"github.com/glynternet/oscli/pkg/osc"
 	"github.com/pkg/errors"
 	osc2 "github.com/sander/go-osc/osc"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-const keyAsBlob = "as-blob"
 
 var cmdSend = &cobra.Command{
 	Use:   "send",
@@ -47,7 +44,7 @@ var cmdSend = &cobra.Command{
 		)
 
 		msg := osc2.NewMessage(msgAddr)
-		parse := getParser(viper.GetBool(keyAsBlob))
+		parse := getParser(asBlob)
 		for _, val := range args[1:] {
 			app, err := parse(val)
 			if err != nil {
@@ -65,23 +62,8 @@ var cmdSend = &cobra.Command{
 	},
 }
 
-type argParser func(arg string) interface{}
-
-// blobParse will convert any string argument to a []byte so that it will be sent
-// as a blob argument
-func blobParse(arg string) (interface{}, error) {
-	return []byte(arg), nil
-}
-
-func getParser(asBlobs bool) func(string) (interface{}, error) {
-	if asBlobs {
-		return blobParse
-	}
-	return osc3.Parse
-}
-
 func init() {
-	cmdSend.Flags().Bool(keyAsBlob, false, "send all arguments as blobs")
+
 	rootCmd.AddCommand(cmdSend)
 	err := viper.BindPFlags(cmdSend.Flags())
 	if err != nil {
