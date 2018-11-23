@@ -38,12 +38,13 @@ var cmdMetro = &cobra.Command{
 			log.Fatal(fmt.Errorf("%s must be positive, received %f", keyMsgFrequency, msgFreq))
 		}
 
+		parse := getParser(asBlob)
 		var staticArgs []interface{}
 		if len(args) > 0 {
 			for _, arg := range args[1:] {
-				a, err := osc3.Parse(arg)
+				a, err := parse(arg)
 				if err != nil {
-					return errors.Wrapf(err, "parsing arg '%s' as value", arg)
+					return errors.Wrapf(err, "parsing arg:%q", arg)
 				}
 				staticArgs = append(staticArgs, a)
 			}
