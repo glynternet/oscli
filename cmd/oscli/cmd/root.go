@@ -48,7 +48,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&remoteHost, "remote-host", "r", "", "address to send any messages to")
 	rootCmd.PersistentFlags().UintVar(&remotePort, "remote-port", 9000, "port of the remote host to send any messages to")
 
-	rootCmd.Flags().BoolVar(&asBlob, "as-blob", false, "send all arguments as blobs (in monitor and send subcommands)")
+	rootCmd.PersistentFlags().BoolVar(&asBlob, "as-blob", false, "send all arguments as blobs (in monitor and send)")
 	rootCmd.PersistentFlags().Float64P(keyMsgFrequency, "m", 25, "frequency to send messages at")
 
 	err := viper.BindPFlags(rootCmd.PersistentFlags())
