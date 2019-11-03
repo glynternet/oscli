@@ -20,6 +20,12 @@
   revision = "c8f491345bb7174e3a8cd7cffaeade1031b609db"
 
 [[projects]]
+  branch = "develop"
+  name = "github.com/glynternet/pkg"
+  packages = ["cmd"]
+  revision = "9303ceec2ce817f2e6a29dd0e4ced096c92876fb"
+
+[[projects]]
   name = "github.com/hashicorp/hcl"
   packages = [".","hcl/ast","hcl/parser","hcl/printer","hcl/scanner","hcl/strconv","hcl/token","json/parser","json/scanner","json/token"]
   revision = "8cb6e5b959231cc1119e43259c4a608f9c51a241"
@@ -82,8 +88,8 @@
 [[projects]]
   name = "github.com/spf13/cobra"
   packages = ["."]
-  revision = "ef82de70bb3f60c65fb8eebacbb2d122ef517385"
-  version = "v0.0.3"
+  revision = "f2b07da1e2c38d5f12845a4f607e2e1018cbb1f5"
+  version = "v0.0.5"
 
 [[projects]]
   branch = "master"
@@ -130,6 +136,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "073d7283e4c64614d4fa294190aef363a72a5a566c9c5b3b9f44a9ce1ab77f68"
+  inputs-digest = "c22689d9a4fbeb52d9ab70756a81e4385f02ea5f4578bbb3c02e4c89d560f3a5"
   solver-name = "gps-cdcl"
   solver-version = 1
