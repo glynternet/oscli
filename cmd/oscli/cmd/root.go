@@ -3,10 +3,12 @@ package cmd
 import (
 	"log"
 	"net"
+	"os"
 	"strings"
 
 	"github.com/glynternet/oscli/internal"
 	"github.com/glynternet/oscli/internal/osc"
+	"github.com/glynternet/pkg/cmd"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -42,6 +44,8 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
+	rootCmd.AddCommand(cmd.NewBashCompletion(rootCmd, os.Stdout))
+
 	rootCmd.PersistentFlags().BoolP(keyLocal, "l", false, usageLocal)
 	rootCmd.PersistentFlags().String(keyListenHost, "", usageListenHost)
 	rootCmd.PersistentFlags().Uint(keyListenPort, 9000, usageListenPort)
