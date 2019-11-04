@@ -19,6 +19,7 @@ const (
 	keyDecodeBlob = "decode-blobs"
 )
 
+// Monitor adds a generate command to the parent command
 func Monitor(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 	var (
 		listenHost  string

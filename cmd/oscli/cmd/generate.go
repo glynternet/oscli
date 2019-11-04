@@ -20,6 +20,7 @@ const (
 	keyWaveFrequency = "wave-freq"
 )
 
+// Generate adds a generate command to the parent command
 func Generate(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 	var (
 		localMode  bool

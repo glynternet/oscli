@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Send adds a generate command to the parent command
 func Send(_ *log.Logger, _ io.Writer, parent *cobra.Command) error {
 	var (
 		localMode  bool
