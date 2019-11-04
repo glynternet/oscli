@@ -1,8 +1,9 @@
 package osc
 
 import (
-	"github.com/pkg/errors"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // CleanAddress will ensure that the given address is in a format that is

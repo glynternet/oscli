@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"log"
 
 	osc3 "github.com/glynternet/oscli/internal/osc"
@@ -13,67 +14,77 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cmdMetro = &cobra.Command{
-	Use:   "metro [ADDRESS] [MESSAGE]...",
-	Short: "generate a ticker of the same OSC message",
-	Args:  cobra.MinimumNArgs(2),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		msgAddr, err := osc2.CleanAddress(args[0])
-		if err != nil {
-			return errors.Wrap(err, "parsing OSC message address")
-		}
+// Metro adds a generate command to the parent command
+func Metro(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
+	var (
+		remoteHost string
+		remotePort uint
+		msgFreq    float64
+		asBlob     bool
+		localMode  bool
 
-		host, err := initRemoteHost()
-		if err != nil {
-			return errors.Wrap(err, "initialising host")
-		}
-
-		client := osc.NewClient(
-			host,
-			int(remotePort),
-		)
-
-		msgFreq := viper.GetFloat64(keyMsgFrequency)
-		if msgFreq <= 0 {
-			log.Fatal(fmt.Errorf("%s must be positive, received %f", keyMsgFrequency, msgFreq))
-		}
-
-		parse := getParser(asBlob)
-		var staticArgs []interface{}
-		if len(args) > 0 {
-			for _, arg := range args[1:] {
-				a, err := parse(arg)
+		cmd = &cobra.Command{
+			Use:   "metro [ADDRESS] [MESSAGE]...",
+			Short: "generate a ticker of the same OSC message",
+			Args:  cobra.MinimumNArgs(2),
+			RunE: func(cmd *cobra.Command, args []string) error {
+				msgAddr, err := osc2.CleanAddress(args[0])
 				if err != nil {
-					return errors.Wrapf(err, "parsing arg:%q", arg)
+					return errors.Wrap(err, "parsing OSC message address")
 				}
-				staticArgs = append(staticArgs, a)
-			}
-		}
 
-		genFn := func() *osc.Message {
-			return osc.NewMessage(msgAddr, staticArgs...)
-		}
-
-		// TODO: the second argument to this could be a ticker or something?
-		msgCh := osc3.Generate(genFn, wave.Frequency(msgFreq).Period())
-		for {
-			select {
-			case msg := <-msgCh:
-				err := client.Send(msg)
+				host, err := initRemoteHost(localMode, remoteHost)
 				if err != nil {
-					log.Print(errors.Wrap(err, "sending message to client"))
-					continue
+					return errors.Wrap(err, "initialising host")
 				}
-				log.Printf("Message (%+v) sent to client at %s:%d", msg, client.IP(), client.Port())
-			}
-		}
-	},
-}
 
-func init() {
-	rootCmd.AddCommand(cmdMetro)
-	err := viper.BindPFlags(cmdMetro.Flags())
-	if err != nil {
-		log.Fatal(err)
-	}
+				client := osc.NewClient(
+					host,
+					int(remotePort),
+				)
+
+				if msgFreq <= 0 {
+					return fmt.Errorf("%s must be positive, received %f", keyMsgFrequency, msgFreq)
+				}
+
+				parse := getParser(asBlob)
+				var staticArgs []interface{}
+				if len(args) > 0 {
+					for _, arg := range args[1:] {
+						a, err := parse(arg)
+						if err != nil {
+							return errors.Wrapf(err, "parsing arg:%q", arg)
+						}
+						staticArgs = append(staticArgs, a)
+					}
+				}
+
+				genFn := func() *osc.Message {
+					return osc.NewMessage(msgAddr, staticArgs...)
+				}
+
+				// TODO: the second argument to this could be a ticker or something?
+				msgCh := osc3.Generate(genFn, wave.Frequency(msgFreq).Period())
+				for {
+					select {
+					case msg := <-msgCh:
+						err := client.Send(msg)
+						if err != nil {
+							logger.Print(errors.Wrap(err, "sending message to client"))
+							continue
+						}
+						logger.Printf("Message (%+v) sent to client at %s:%d", msg, client.IP(), client.Port())
+					}
+				}
+			},
+		}
+	)
+
+	parent.AddCommand(cmd)
+	flagLocalMode(cmd, &localMode)
+	flagRemoteHost(cmd, &remoteHost)
+	flagRemotePort(cmd, &remotePort)
+	flagMessageFrequency(cmd, &msgFreq)
+	flagAsBlob(cmd, &asBlob)
+	return errors.Wrap(viper.BindPFlags(cmd.Flags()), "binding pflags")
 }
