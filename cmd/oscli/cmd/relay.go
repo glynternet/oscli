@@ -17,6 +17,7 @@ const (
 	keyForwardPort = "forward-port"
 )
 
+// Relay adds a generate command to the parent command
 func Relay(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 	var (
 		listenHost  string

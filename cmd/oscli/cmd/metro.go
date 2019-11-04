@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Metro adds a generate command to the parent command
 func Metro(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 	var (
 		remoteHost string
