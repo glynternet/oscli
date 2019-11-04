@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -18,62 +19,77 @@ const (
 	keyDecodeBlob = "decode-blobs"
 )
 
-var cmdMonitor = &cobra.Command{
-	Use:   "monitor",
-	Short: "monitor incoming OSC messages",
-	Run: func(cmd *cobra.Command, args []string) {
-		addr := fmt.Sprintf("%s:%d", viper.GetString(keyListenHost), viper.GetInt(keyListenPort))
-		conn, err := net.ListenPacket("udp", addr)
-		if err != nil {
-			fmt.Println(errors.Wrap(err, "creating listener"))
-			os.Exit(1)
-		}
-		defer func() {
-			err := conn.Close()
-			if err != nil {
-				log.Print(errors.Wrap(err, "closing listen connection"))
-			}
-		}()
+func Monitor(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
+	var (
+		listenHost  string
+		listenPort  uint
+		noInput     bool
+		decodeBlobs bool
 
-		if !viper.GetBool(keyNoInput) {
-			fmt.Println(`Press "q" then enter to exit`)
-			go startQuitterReader(bufio.NewReader(os.Stdin))
-		}
+		cmd = &cobra.Command{
+			Use:   "monitor",
+			Short: "monitor incoming OSC messages",
+			RunE: func(cmd *cobra.Command, args []string) error {
+				addr := fmt.Sprintf("%s:%d", listenHost, listenPort)
+				conn, err := net.ListenPacket("udp", addr)
+				if err != nil {
+					return errors.Wrap(err, "creating listener")
+				}
+				defer func() {
+					err := conn.Close()
+					if err != nil {
+						logger.Print(errors.Wrap(err, "closing listen connection"))
+					}
+				}()
 
-		print := getPrinter(viper.GetBool(keyDecodeBlob))
+				if !noInput {
+					fmt.Println(`Press "q" then enter to exit`)
+					go startQuitterReader(bufio.NewReader(os.Stdin))
+				}
 
-		fmt.Println("Listening on", addr)
-		srv := &osc.Server{}
+				printMsg := getPrinter(decodeBlobs)
 
-		for {
-			packet, err := srv.ReceivePacket(conn)
-			if err != nil {
-				fmt.Println("Server error: " + err.Error())
-				// TODO: add a flag to exit on error instead of loop?
-				continue
-			}
+				fmt.Println("Listening on", addr)
+				srv := &osc.Server{}
 
-			if packet != nil {
-				switch packet.(type) {
-				default:
-					fmt.Println("Unknown packet type!")
+				for {
+					packet, err := srv.ReceivePacket(conn)
+					if err != nil {
+						fmt.Println("Server error: " + err.Error())
+						// TODO: add a flag to exit on error instead of loop?
+						continue
+					}
 
-				case *osc.Message:
-					fmt.Printf("-- OSC Message: ")
-					print(packet.(*osc.Message))
+					if packet != nil {
+						switch packet.(type) {
+						default:
+							fmt.Println("Unknown packet type!")
 
-				case *osc.Bundle:
-					fmt.Println("-- OSC Bundle:")
-					bundle := packet.(*osc.Bundle)
-					for i, message := range bundle.Messages {
-						fmt.Printf("  -- OSC Message #%d: ", i+1)
-						print(message)
+						case *osc.Message:
+							fmt.Printf("-- OSC Message: ")
+							printMsg(packet.(*osc.Message))
+
+						case *osc.Bundle:
+							fmt.Println("-- OSC Bundle:")
+							bundle := packet.(*osc.Bundle)
+							for i, message := range bundle.Messages {
+								fmt.Printf("  -- OSC Message #%d: ", i+1)
+								printMsg(message)
+							}
+						}
 					}
 				}
-			}
-		}
 
-	},
+			},
+		}
+	)
+
+	parent.AddCommand(cmd)
+	flagListenHost(cmd, &listenHost)
+	flagListenPort(cmd, &listenPort)
+	cmd.Flags().BoolVar(&noInput, keyNoInput, false, "turn on no-input mode for when no terminal is available")
+	cmd.Flags().BoolVar(&decodeBlobs, keyDecodeBlob, false, "decode blob values into strings")
+	return errors.Wrap(viper.BindPFlags(cmd.Flags()), "binding pflags")
 }
 
 func getPrinter(decodeBlobs bool) func(*osc.Message) {
@@ -111,15 +127,5 @@ func startQuitterReader(r byteReader) {
 		if c == 'q' {
 			os.Exit(0)
 		}
-	}
-}
-
-func init() {
-	rootCmd.AddCommand(cmdMonitor)
-	cmdMonitor.Flags().Bool(keyNoInput, false, "turn on no-input mode for when no terminal is available")
-	cmdMonitor.Flags().Bool(keyDecodeBlob, false, "decode blob values into strings")
-	err := viper.BindPFlags(cmdMonitor.Flags())
-	if err != nil {
-		log.Fatal(err)
 	}
 }
