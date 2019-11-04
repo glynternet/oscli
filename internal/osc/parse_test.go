@@ -1,10 +1,10 @@
-package osc
+package osc_test
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/glynternet/oscli/pkg/osc"
+	"github.com/glynternet/oscli/internal/osc"
 	"github.com/magiconair/properties/assert"
 )
 
@@ -17,12 +17,12 @@ func TestParse(t *testing.T) {
 	}{
 		{
 			name:  "zero-values",
-			error: EmptyValueError,
+			error: osc.EmptyValueError,
 		},
 		{
 			name:     "string value",
 			val:      "hey man wassup",
-			expected: string("hey man wassup"),
+			expected: "hey man wassup",
 		},
 		{
 			name:     "float32 value with awkward decimal",

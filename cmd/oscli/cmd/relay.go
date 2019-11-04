@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
-	"os"
 
 	"github.com/pkg/errors"
 	"github.com/sander/go-osc/osc"
@@ -17,49 +17,51 @@ const (
 	keyForwardPort = "forward-port"
 )
 
-var relayCmd = &cobra.Command{
-	Use:   "relay",
-	Short: "listen and relay osc messages",
-	Run: func(cmd *cobra.Command, args []string) {
-		listenHost := viper.GetString(keyListenHost)
-		listenPort := viper.GetInt(keyListenPort)
-		forwardHost := viper.GetString(keyForwardHost)
-		forwardPort := viper.GetInt(keyForwardPort)
+// Relay adds a generate command to the parent command
+func Relay(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
+	var (
+		listenHost  string
+		listenPort  uint
+		forwardHost string
+		forwardPort uint
 
-		if listenHost == forwardHost && listenPort == forwardPort {
-			log.Fatal(errors.New("cannot forward to listen address: forward loop"))
-		}
+		relayCmd = &cobra.Command{
+			Use:   "relay",
+			Short: "listen and relay osc messages",
+			RunE: func(cmd *cobra.Command, args []string) error {
 
-		listenAddr := fmt.Sprintf("%s:%d", listenHost, listenPort)
-		receiveChan, err := receivePackets(listenAddr)
-		if err != nil {
-			log.Fatal(errors.Wrap(err, "creating packet receiver"))
-		}
-
-		c := osc.NewClient(forwardHost, forwardPort)
-
-		for {
-			select {
-			case p := <-receiveChan:
-				if err := c.Send(p); err != nil {
-					log.Print(errors.Wrap(err, "forwarding to client"))
+				if listenHost == forwardHost && listenPort == forwardPort {
+					return errors.New("cannot forward to listen address: forward loop")
 				}
-			}
+
+				listenAddr := fmt.Sprintf("%s:%d", listenHost, listenPort)
+				receiveChan, err := receivePackets(logger, listenAddr)
+				if err != nil {
+					return errors.Wrap(err, "creating packet receiver")
+				}
+
+				c := osc.NewClient(forwardHost, int(forwardPort))
+
+				for {
+					select {
+					case p := <-receiveChan:
+						if err := c.Send(p); err != nil {
+							logger.Print(errors.Wrap(err, "forwarding to client"))
+						}
+					}
+				}
+			},
 		}
-	},
+	)
+	parent.AddCommand(relayCmd)
+	flagListenHost(relayCmd, &listenHost)
+	flagListenPort(relayCmd, &listenPort)
+	relayCmd.Flags().StringVar(&forwardHost, keyForwardHost, "", "forwarding host address")
+	relayCmd.Flags().UintVar(&forwardPort, keyForwardPort, 9000, "forwarding port number")
+	return errors.Wrap(viper.BindPFlags(relayCmd.Flags()), "binding pflags")
 }
 
-func init() {
-	rootCmd.AddCommand(relayCmd)
-	relayCmd.Flags().String(keyForwardHost, "", "forwarding host address")
-	relayCmd.Flags().Uint(keyForwardPort, 9000, "forwarding port number")
-	err := viper.BindPFlags(relayCmd.Flags())
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func receivePackets(addr string) (<-chan osc.Packet, error) {
+func receivePackets(logger *log.Logger, addr string) (<-chan osc.Packet, error) {
 	ch := make(chan osc.Packet)
 	conn, err := net.ListenPacket("udp", addr)
 	if err != nil {
@@ -67,9 +69,10 @@ func receivePackets(addr string) (<-chan osc.Packet, error) {
 	}
 	go func() {
 		defer func() {
-			err := conn.Close()
-			if err != nil {
-				log.Print(errors.Wrap(err, "closing listen connection"))
+			close(ch)
+			logger.Println("closed channel")
+			if err := conn.Close(); err != nil {
+				logger.Print(errors.Wrap(err, "closing listen connection"))
 			}
 		}()
 		fmt.Println("Listening on", addr)
@@ -78,7 +81,7 @@ func receivePackets(addr string) (<-chan osc.Packet, error) {
 			packet, err := (&osc.Server{}).ReceivePacket(conn)
 			if err != nil {
 				fmt.Println("Receiving packet: " + err.Error())
-				os.Exit(1)
+				return
 			}
 
 			if packet != nil {
