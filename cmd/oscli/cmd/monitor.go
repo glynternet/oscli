@@ -62,22 +62,7 @@ func Monitor(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 					}
 
 					if packet != nil {
-						switch packet.(type) {
-						default:
-							fmt.Println("Unknown packet type!")
-
-						case *osc.Message:
-							fmt.Printf("-- OSC Message: ")
-							printMsg(packet.(*osc.Message))
-
-						case *osc.Bundle:
-							fmt.Println("-- OSC Bundle:")
-							bundle := packet.(*osc.Bundle)
-							for i, message := range bundle.Messages {
-								fmt.Printf("  -- OSC Message #%d: ", i+1)
-								printMsg(message)
-							}
-						}
+						printMsg.handlePacket(packet)
 					}
 				}
 
@@ -93,7 +78,27 @@ func Monitor(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 	return errors.Wrap(viper.BindPFlags(cmd.Flags()), "binding pflags")
 }
 
-func getPrinter(decodeBlobs bool) func(*osc.Message) {
+type handleMessageFunc func(message *osc.Message)
+
+func (fn handleMessageFunc) handlePacket(packet osc.Packet) {
+	switch p := packet.(type) {
+	case *osc.Message:
+		fmt.Printf("-- OSC Message: ")
+		fn(p)
+
+	case *osc.Bundle:
+		fmt.Println("-- OSC Bundle:")
+		for i, message := range p.Messages {
+			fmt.Printf("  -- OSC Message #%d: ", i+1)
+			fn(message)
+		}
+
+	default:
+		fmt.Println("Unknown packet type!")
+	}
+}
+
+func getPrinter(decodeBlobs bool) handleMessageFunc {
 	if decodeBlobs {
 		return decodedBlobsPrint
 	}
