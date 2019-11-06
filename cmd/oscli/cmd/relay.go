@@ -41,7 +41,7 @@ func Relay(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 				}
 
 				c := osc.NewClient(forwardHost, int(forwardPort))
-
+				logger.Printf("forwarding to %s:%d", forwardHost, forwardPort)
 				for {
 					select {
 					case p := <-receiveChan:
