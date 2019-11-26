@@ -18,6 +18,8 @@ func buildCmdTree(logger *log.Logger, out io.Writer, rootCmd *cobra.Command) {
 		cmd.Generate,
 		cmd.Metro,
 		cmd.Monitor,
+		cmd.Play,
+		cmd.Record,
 		cmd.Relay,
 		cmd.Send,
 	} {

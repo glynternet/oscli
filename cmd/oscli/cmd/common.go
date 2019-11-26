@@ -9,6 +9,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+const defaultRecordFile = "./recording.osc"
+
 func initRemoteHost(localMode bool, remoteHost string) (string, error) {
 	host, err := internal.GetRemoteHost(
 		localMode,
