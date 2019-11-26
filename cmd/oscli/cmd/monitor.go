@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net"
 	"os"
 
+	"github.com/glynternet/oscli/internal/osc"
 	"github.com/pkg/errors"
-	"github.com/sander/go-osc/osc"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -31,41 +30,17 @@ func Monitor(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 			Use:   "monitor",
 			Short: "monitor incoming OSC messages",
 			RunE: func(cmd *cobra.Command, args []string) error {
-				addr := fmt.Sprintf("%s:%d", listenHost, listenPort)
-				conn, err := net.ListenPacket("udp", addr)
-				if err != nil {
-					return errors.Wrap(err, "creating listener")
-				}
-				defer func() {
-					err := conn.Close()
-					if err != nil {
-						logger.Print(errors.Wrap(err, "closing listen connection"))
-					}
-				}()
-
 				if !noInput {
 					fmt.Println(`Press "q" then enter to exit`)
 					go startQuitterReader(bufio.NewReader(os.Stdin))
 				}
 
-				printMsg := getPrinter(decodeBlobs)
-
-				fmt.Println("Listening on", addr)
-				srv := &osc.Server{}
-
-				for {
-					packet, err := srv.ReceivePacket(conn)
-					if err != nil {
-						fmt.Println("Server error: " + err.Error())
-						// TODO: add a flag to exit on error instead of loop?
-						continue
-					}
-
-					if packet != nil {
-						printMsg.handlePacket(packet)
-					}
-				}
-
+				return errors.Wrap(
+					osc.ReceivePackets(logger,
+						fmt.Sprintf("%s:%d", listenHost, listenPort),
+						osc.Print(decodeBlobs),
+						printError),
+					"receiving packets")
 			},
 		}
 	)
@@ -76,46 +51,6 @@ func Monitor(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 	cmd.Flags().BoolVar(&noInput, keyNoInput, false, "turn on no-input mode for when no terminal is available")
 	cmd.Flags().BoolVar(&decodeBlobs, keyDecodeBlob, false, "decode blob values into strings")
 	return errors.Wrap(viper.BindPFlags(cmd.Flags()), "binding pflags")
-}
-
-type handleMessageFunc func(message *osc.Message)
-
-func (fn handleMessageFunc) handlePacket(packet osc.Packet) {
-	switch p := packet.(type) {
-	case *osc.Message:
-		fmt.Printf("-- OSC Message: ")
-		fn(p)
-
-	case *osc.Bundle:
-		fmt.Println("-- OSC Bundle:")
-		for i, message := range p.Messages {
-			fmt.Printf("  -- OSC Message #%d: ", i+1)
-			fn(message)
-		}
-
-	default:
-		fmt.Println("Unknown packet type!")
-	}
-}
-
-func getPrinter(decodeBlobs bool) handleMessageFunc {
-	if decodeBlobs {
-		return decodedBlobsPrint
-	}
-	return rawPrint
-}
-
-func rawPrint(msg *osc.Message) {
-	fmt.Println(msg)
-}
-
-func decodedBlobsPrint(msg *osc.Message) {
-	fmt.Println(msg)
-	for i, a := range msg.Arguments {
-		if bs, ok := a.([]byte); ok {
-			fmt.Printf("element[%d]: %s\n", i, string(bs))
-		}
-	}
 }
 
 type byteReader interface {
