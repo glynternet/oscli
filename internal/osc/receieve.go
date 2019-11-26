@@ -9,6 +9,9 @@ import (
 	"github.com/sander/go-osc/osc"
 )
 
+// ReceivePackets will receive all packets at the given address.
+// Successfully received packets will be handled by the PacketHandler.
+// Errors whilst receiving will be handled by the given ErrorHandler.
 func ReceivePackets(logger *log.Logger, addr string,
 	handlePacket PacketHandler,
 	handleReceiveError ErrorHandler,
@@ -37,6 +40,8 @@ func ReceivePackets(logger *log.Logger, addr string,
 	}
 }
 
+// PacketHandler handles a packet
 type PacketHandler func(osc.Packet)
 
+// ErrorHandler handles an error
 type ErrorHandler func(error)
