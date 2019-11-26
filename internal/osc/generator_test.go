@@ -22,14 +22,12 @@ func TestGenerate(t *testing.T) {
 			name:    "cancel before first message",
 			period:  110 * time.Millisecond,
 			timeout: 100 * time.Millisecond,
-		},
-		{
+		}, {
 			name:    "cancel after one message",
 			period:  70 * time.Millisecond,
 			timeout: 100 * time.Millisecond,
 			count:   1,
-		},
-		{
+		}, {
 			name:    "cancel after five messages",
 			period:  18 * time.Millisecond,
 			timeout: 100 * time.Millisecond,
