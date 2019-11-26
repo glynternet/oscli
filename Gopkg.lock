@@ -44,6 +44,12 @@
   version = "v1.0"
 
 [[projects]]
+  name = "github.com/influxdata/tdigest"
+  packages = ["."]
+  revision = "3fbb3e34b87fe64262cbf10ac00562f36ae98235"
+  version = "v0.0.1"
+
+[[projects]]
   name = "github.com/magiconair/properties"
   packages = [".","assert"]
   revision = "de8848e004dd33dc07a2947b3d76f618a7fc7ef1"
@@ -111,7 +117,7 @@
 
 [[projects]]
   name = "github.com/stretchr/testify"
-  packages = ["assert"]
+  packages = ["assert","require"]
   revision = "221dbe5ed46703ee255b1da0dec05086f5035f62"
   version = "v1.4.0"
 
@@ -142,6 +148,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "748514de1e1df78b160092d2004761ab8f8ae1b894990b18282a1f2c943e99c2"
+  inputs-digest = "f0a2603a4c4495fed89710f3f016eb07189f44c2e1e56f6a1d6dd69e8b04591f"
   solver-name = "gps-cdcl"
   solver-version = 1

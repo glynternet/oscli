@@ -2,7 +2,6 @@ package osc
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 	"time"
@@ -23,7 +22,7 @@ func ReceivePackets(ctx context.Context, logger *log.Logger, addr string,
 		return errors.Wrap(err, "creating listener")
 	}
 	srv := &osc.Server{ReadTimeout: time.Second}
-	fmt.Println("Listening on", addr)
+	logger.Println("Listening on", addr)
 
 	for {
 		select {
