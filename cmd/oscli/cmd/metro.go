@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -63,8 +64,8 @@ func Metro(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 					return osc.NewMessage(msgAddr, staticArgs...)
 				}
 
-				// TODO: the second argument to this could be a ticker or something?
-				msgCh := osc3.Generate(genFn, wave.Frequency(msgFreq).Period())
+				// TODO: the third argument to this could be a ticker or something?
+				msgCh := osc3.Generate(context.TODO(), genFn, wave.Frequency(msgFreq).Period())
 				for {
 					select {
 					case msg := <-msgCh:

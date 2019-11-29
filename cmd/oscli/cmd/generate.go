@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -70,8 +71,8 @@ The messages will be sent to the given address.`,
 
 				genFn := models.NowSinNormalised(msgAddr, staticArgs, waveFreq)
 
-				// TODO: the second argument to this could be a ticker or something?
-				msgCh := iosc.Generate(genFn, wave.Frequency(msgFreq).Period())
+				// TODO: the third argument to this could be a ticker or something?
+				msgCh := iosc.Generate(context.TODO(), genFn, wave.Frequency(msgFreq).Period())
 				for {
 					select {
 					case msg := <-msgCh:
