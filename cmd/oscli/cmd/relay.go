@@ -45,7 +45,9 @@ func Relay(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 
 				listenAddr := fmt.Sprintf("%s:%d", listenHost, listenPort)
 				logger.Printf("forwarding to %s:%d", forwardHost, forwardPort)
-				return errors.Wrap(osc2.ReceivePackets(context.Background(), logger, listenAddr, handle, printError), "receiving packets")
+				return errors.Wrap(
+					osc2.ReceivePackets(context.Background(), logger, listenAddr, handle, printError),
+					"receiving packets")
 			},
 		}
 	)
