@@ -54,7 +54,7 @@ func TestGenerate(t *testing.T) {
 				assert.Equal(t, expectedMsg, msg)
 			}
 			assert.Len(t, msgs, tc.count)
-			assert.WithinDuration(t, start.Add(tc.timeout), stop, tc.timeout/25) // 4%
+			assert.WithinDuration(t, start.Add(tc.timeout), stop, tc.timeout/10) // fairly lax 10% for CI test runners
 		})
 	}
 }
