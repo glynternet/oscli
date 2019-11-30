@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -36,7 +37,7 @@ func Monitor(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 				}
 
 				return errors.Wrap(
-					osc.ReceivePackets(logger,
+					osc.ReceivePackets(context.Background(), logger,
 						fmt.Sprintf("%s:%d", listenHost, listenPort),
 						osc.Print(decodeBlobs),
 						printError),
