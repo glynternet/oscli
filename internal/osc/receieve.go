@@ -37,15 +37,7 @@ func ReceivePackets(ctx context.Context, logger *log.Logger, addr string,
 		default:
 			packet, err := srv.ReceivePacket(conn)
 			if err != nil {
-				switch err := err.(type) {
-				case net.Error:
-					if err.Timeout() {
-						continue
-					}
-				default:
-					handleReceiveError(err)
-					continue
-				}
+				handleError(handleReceiveError, err)
 			}
 
 			if packet != nil {
@@ -53,6 +45,13 @@ func ReceivePackets(ctx context.Context, logger *log.Logger, addr string,
 			}
 		}
 	}
+}
+
+func handleError(handler ErrorHandler, err error) {
+	if nErr, ok := err.(net.Error); ok && nErr.Timeout() {
+		return
+	}
+	handler(err)
 }
 
 // PacketHandler handles a packet
