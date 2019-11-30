@@ -1,9 +1,11 @@
 package osc
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/sander/go-osc/osc"
@@ -12,7 +14,7 @@ import (
 // ReceivePackets will receive all packets at the given address.
 // Successfully received packets will be handled by the PacketHandler.
 // Errors whilst receiving will be handled by the given ErrorHandler.
-func ReceivePackets(logger *log.Logger, addr string,
+func ReceivePackets(ctx context.Context, logger *log.Logger, addr string,
 	handlePacket PacketHandler,
 	handleReceiveError ErrorHandler,
 ) error {
@@ -20,22 +22,35 @@ func ReceivePackets(logger *log.Logger, addr string,
 	if err != nil {
 		return errors.Wrap(err, "creating listener")
 	}
-	srv := &osc.Server{}
-	defer func() {
-		if err := conn.Close(); err != nil {
-			logger.Print(errors.Wrap(err, "closing listen connection"))
-		}
-	}()
+	srv := &osc.Server{ReadTimeout: time.Second}
 	fmt.Println("Listening on", addr)
-	for {
-		packet, err := srv.ReceivePacket(conn)
-		if err != nil {
-			handleReceiveError(err)
-			continue
-		}
 
-		if packet != nil {
-			handlePacket(packet)
+	for {
+		select {
+		case <-ctx.Done():
+			err = conn.Close()
+			if err != nil {
+				return errors.Wrapf(err, "closing connection")
+			}
+			logger.Println("Listen connection closed")
+			return nil
+		default:
+			packet, err := srv.ReceivePacket(conn)
+			if err != nil {
+				switch err := err.(type) {
+				case net.Error:
+					if err.Timeout() {
+						continue
+					}
+				default:
+					handleReceiveError(err)
+					continue
+				}
+			}
+
+			if packet != nil {
+				handlePacket(packet)
+			}
 		}
 	}
 }
