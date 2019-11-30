@@ -38,6 +38,7 @@ func ReceivePackets(ctx context.Context, logger *log.Logger, addr string,
 			packet, err := srv.ReceivePacket(conn)
 			if err != nil {
 				handleError(handleReceiveError, err)
+				continue
 			}
 
 			if packet != nil {
