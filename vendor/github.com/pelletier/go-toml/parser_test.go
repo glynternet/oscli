@@ -79,7 +79,7 @@ zyx = 42`)
 	if err == nil {
 		t.Error("Error should have been returned.")
 	}
-	if err.Error() != "(1, 4): unexpected token" {
+	if err.Error() != "(1, 4): parsing error: keys cannot contain ] character" {
 		t.Error("Bad error message:", err.Error())
 	}
 }
@@ -197,7 +197,7 @@ func TestFloatsWithExponents(t *testing.T) {
 	tree, err := Load("a = 5e+22\nb = 5E+22\nc = -5e+22\nd = -5e-22\ne = 6.626e-34")
 	assertTree(t, tree, err, map[string]interface{}{
 		"a": float64(5e+22),
-		"b": float64(5E+22),
+		"b": float64(5e+22),
 		"c": float64(-5e+22),
 		"d": float64(-5e-22),
 		"e": float64(6.626e-34),
@@ -222,6 +222,77 @@ func TestDateNano(t *testing.T) {
 	tree, err := Load("a = 1979-05-27T00:32:00.999999999-07:00")
 	assertTree(t, tree, err, map[string]interface{}{
 		"a": time.Date(1979, time.May, 27, 0, 32, 0, 999999999, time.FixedZone("", -7*60*60)),
+	})
+}
+
+func TestLocalDateTime(t *testing.T) {
+	tree, err := Load("a = 1979-05-27T07:32:00")
+	assertTree(t, tree, err, map[string]interface{}{
+		"a": LocalDateTime{
+			Date: LocalDate{
+				Year:  1979,
+				Month: 5,
+				Day:   27,
+			},
+			Time: LocalTime{
+				Hour:       7,
+				Minute:     32,
+				Second:     0,
+				Nanosecond: 0,
+			}},
+	})
+}
+
+func TestLocalDateTimeNano(t *testing.T) {
+	tree, err := Load("a = 1979-05-27T07:32:00.999999")
+	assertTree(t, tree, err, map[string]interface{}{
+		"a": LocalDateTime{
+			Date: LocalDate{
+				Year:  1979,
+				Month: 5,
+				Day:   27,
+			},
+			Time: LocalTime{
+				Hour:       7,
+				Minute:     32,
+				Second:     0,
+				Nanosecond: 999999000,
+			}},
+	})
+}
+
+func TestLocalDate(t *testing.T) {
+	tree, err := Load("a = 1979-05-27")
+	assertTree(t, tree, err, map[string]interface{}{
+		"a": LocalDate{
+			Year:  1979,
+			Month: 5,
+			Day:   27,
+		},
+	})
+}
+
+func TestLocalTime(t *testing.T) {
+	tree, err := Load("a = 07:32:00")
+	assertTree(t, tree, err, map[string]interface{}{
+		"a": LocalTime{
+			Hour:       7,
+			Minute:     32,
+			Second:     0,
+			Nanosecond: 0,
+		},
+	})
+}
+
+func TestLocalTimeNano(t *testing.T) {
+	tree, err := Load("a = 00:32:00.999999")
+	assertTree(t, tree, err, map[string]interface{}{
+		"a": LocalTime{
+			Hour:       0,
+			Minute:     32,
+			Second:     0,
+			Nanosecond: 999999000,
+		},
 	})
 }
 
@@ -525,6 +596,33 @@ point = { x = 1, y = 2 }`)
 	})
 }
 
+func TestInlineGroupBareKeysUnderscore(t *testing.T) {
+	tree, err := Load(`foo = { _bar = "buz" }`)
+	assertTree(t, tree, err, map[string]interface{}{
+		"foo": map[string]interface{}{
+			"_bar": "buz",
+		},
+	})
+}
+
+func TestInlineGroupBareKeysDash(t *testing.T) {
+	tree, err := Load(`foo = { -bar = "buz" }`)
+	assertTree(t, tree, err, map[string]interface{}{
+		"foo": map[string]interface{}{
+			"-bar": "buz",
+		},
+	})
+}
+
+func TestInlineGroupKeyQuoted(t *testing.T) {
+	tree, err := Load(`foo = { "bar" = "buz" }`)
+	assertTree(t, tree, err, map[string]interface{}{
+		"foo": map[string]interface{}{
+			"bar": "buz",
+		},
+	})
+}
+
 func TestExampleInlineGroupInArray(t *testing.T) {
 	tree, err := Load(`points = [{ x = 1, y = 2 }]`)
 	assertTree(t, tree, err, map[string]interface{}{
@@ -553,7 +651,7 @@ func TestInlineTableCommaExpected(t *testing.T) {
 
 func TestInlineTableCommaStart(t *testing.T) {
 	_, err := Load("foo = {, hello = 53}")
-	if err.Error() != "(1, 8): inline table cannot start with a comma" {
+	if err.Error() != "(1, 8): unexpected token type in inline table: keys cannot contain , character" {
 		t.Error("Bad error message:", err.Error())
 	}
 }
@@ -581,7 +679,7 @@ func TestDuplicateKeys(t *testing.T) {
 
 func TestEmptyIntermediateTable(t *testing.T) {
 	_, err := Load("[foo..bar]")
-	if err.Error() != "(1, 2): invalid table array key: empty table key" {
+	if err.Error() != "(1, 2): invalid table array key: expecting key part after dot" {
 		t.Error("Bad error message:", err.Error())
 	}
 }
@@ -895,5 +993,89 @@ func TestInvalidFloatParsing(t *testing.T) {
 	_, err = Load("a=_1_2")
 	if err.Error() != "(1, 3): cannot start number with underscore" {
 		t.Error("Bad error message:", err.Error())
+	}
+}
+
+func TestMapKeyIsNum(t *testing.T) {
+	_, err := Load("table={2018=1,2019=2}")
+	if err != nil {
+		t.Error("should be passed")
+	}
+	_, err = Load(`table={"2018"=1,"2019"=2}`)
+	if err != nil {
+		t.Error("should be passed")
+	}
+}
+
+func TestInvalidKeyInlineTable(t *testing.T) {
+	_, err := Load("table={invalid..key = 1}")
+	if err.Error() != "(1, 8): invalid key: expecting key part after dot" {
+		t.Error("Bad error message:", err.Error())
+	}
+}
+
+func TestDottedKeys(t *testing.T) {
+	tree, err := Load(`
+name = "Orange"
+physical.color = "orange"
+physical.shape = "round"
+site."google.com" = true`)
+
+	assertTree(t, tree, err, map[string]interface{}{
+		"name": "Orange",
+		"physical": map[string]interface{}{
+			"color": "orange",
+			"shape": "round",
+		},
+		"site": map[string]interface{}{
+			"google.com": true,
+		},
+	})
+}
+
+func TestInvalidDottedKeyEmptyGroup(t *testing.T) {
+	_, err := Load(`a..b = true`)
+	if err == nil {
+		t.Fatal("should return an error")
+	}
+	if err.Error() != "(1, 1): invalid key: expecting key part after dot" {
+		t.Fatalf("invalid error message: %s", err)
+	}
+}
+
+func TestAccidentalNewlines(t *testing.T) {
+	expected := "The quick brown fox jumps over the lazy dog."
+	tree, err := Load(`str1 = "The quick brown fox jumps over the lazy dog."
+
+str2 = """
+The quick brown \
+
+
+  fox jumps over \
+    the lazy dog."""
+
+str3 = """\
+       The quick brown \ 
+       fox jumps over \ 
+       the lazy dog.\  
+       """`)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got := tree.Get("str1")
+	if got != expected {
+		t.Errorf("expected '%s', got '%s'", expected, got)
+	}
+
+	got = tree.Get("str2")
+	if got != expected {
+		t.Errorf("expected '%s', got '%s'", expected, got)
+	}
+
+	got = tree.Get("str3")
+	if got != expected {
+		t.Errorf("expected '%s', got '%s'", expected, got)
 	}
 }
