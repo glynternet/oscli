@@ -3,7 +3,7 @@ package osc
 import (
 	"fmt"
 
-	"github.com/sander/go-osc/osc"
+	"github.com/glynternet/go-osc/osc"
 )
 
 // Print provides a PacketHandler that will print a recieved Packet.

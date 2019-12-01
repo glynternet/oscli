@@ -7,8 +7,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/glynternet/go-osc/osc"
 	"github.com/pkg/errors"
-	"github.com/sander/go-osc/osc"
 )
 
 // ReceivePackets will receive all packets at the given address.
