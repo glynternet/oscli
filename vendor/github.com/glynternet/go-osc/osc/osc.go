@@ -1,4 +1,4 @@
-// go-osc provides a package for sending and receiving OpenSoundControl
+// Package osc provides a package for sending and receiving OpenSoundControl
 // messages. The package is implemented in pure Go.
 package osc
 
@@ -61,7 +61,7 @@ type Client struct {
 // incoming OSC packets and bundles.
 type Server struct {
 	Addr        string
-	Dispatcher  *OscDispatcher
+	Dispatcher  Dispatcher
 	ReadTimeout time.Duration
 }
 
@@ -100,30 +100,30 @@ func (f HandlerFunc) HandleMessage(msg *Message) {
 }
 
 ////
-// OscDispatcher
+// StandardDispatcher
 ////
 
-// OscDispatcher is a dispatcher for OSC packets. It handles the dispatching of
-// received OSC packets.
-type OscDispatcher struct {
+// StandardDispatcher is a dispatcher for OSC packets. It handles the dispatching of
+// received OSC packets to Handlers for their given address.
+type StandardDispatcher struct {
 	handlers       map[string]Handler
 	defaultHandler Handler
 }
 
-// NewOscDispatcher returns an OscDispatcher.
-func NewOscDispatcher() *OscDispatcher {
-	return &OscDispatcher{handlers: make(map[string]Handler)}
+// NewStandardDispatcher returns an StandardDispatcher.
+func NewStandardDispatcher() *StandardDispatcher {
+	return &StandardDispatcher{handlers: make(map[string]Handler)}
 }
 
 // AddMsgHandler adds a new message handler for the given OSC address.
-func (s *OscDispatcher) AddMsgHandler(addr string, handler HandlerFunc) error {
+func (s *StandardDispatcher) AddMsgHandler(addr string, handler HandlerFunc) error {
 	if addr == "*" {
 		s.defaultHandler = handler
 		return nil
 	}
 	for _, chr := range "*?,[]{}# " {
 		if strings.Contains(addr, fmt.Sprintf("%c", chr)) {
-			return errors.New("OSC Address string may not contain any characters in \"*?,[]{}# \n")
+			return errors.New("OSC Address string may not contain any characters in \"*?,[]{}#")
 		}
 	}
 
@@ -136,29 +136,27 @@ func (s *OscDispatcher) AddMsgHandler(addr string, handler HandlerFunc) error {
 }
 
 // Dispatch dispatches OSC packets. Implements the Dispatcher interface.
-func (s *OscDispatcher) Dispatch(packet Packet) {
-	switch packet.(type) {
+func (s *StandardDispatcher) Dispatch(packet Packet) {
+	switch p := packet.(type) {
 	default:
 		return
 
 	case *Message:
-		msg, _ := packet.(*Message)
 		for addr, handler := range s.handlers {
-			if msg.Match(addr) {
-				handler.HandleMessage(msg)
+			if p.Match(addr) {
+				handler.HandleMessage(p)
 			}
 		}
 		if s.defaultHandler != nil {
-			s.defaultHandler.HandleMessage(msg)
+			s.defaultHandler.HandleMessage(p)
 		}
 
 	case *Bundle:
-		bundle, _ := packet.(*Bundle)
-		timer := time.NewTimer(bundle.Timetag.ExpiresIn())
+		timer := time.NewTimer(p.Timetag.ExpiresIn())
 
 		go func() {
 			<-timer.C
-			for _, message := range bundle.Messages {
+			for _, message := range p.Messages {
 				for address, handler := range s.handlers {
 					if message.Match(address) {
 						handler.HandleMessage(message)
@@ -170,7 +168,7 @@ func (s *OscDispatcher) Dispatch(packet Packet) {
 			}
 
 			// Process all bundles
-			for _, b := range bundle.Bundles {
+			for _, b := range p.Bundles {
 				s.Dispatch(b)
 			}
 		}()
@@ -391,7 +389,7 @@ func NewBundle(time time.Time) *Bundle {
 func (b *Bundle) Append(pck Packet) error {
 	switch t := pck.(type) {
 	default:
-		return fmt.Errorf("Unsupported OSC packet type: only Bundle and Message are supported.")
+		return fmt.Errorf("unsupported OSC packet type: only Bundle and Message are supported")
 
 	case *Bundle:
 		b.Bundles = append(b.Bundles, t)
@@ -482,7 +480,7 @@ func NewClient(ip string, port int) *Client {
 // IP returns the IP address.
 func (c *Client) IP() string { return c.ip }
 
-// SetIp sets a new IP address.
+// SetIP sets a new IP address.
 func (c *Client) SetIP(ip string) { c.ip = ip }
 
 // Port returns the port.
@@ -528,20 +526,11 @@ func (c *Client) Send(packet Packet) error {
 // Server
 ////
 
-// Handle registers a new message handler function for an OSC address. The
-// handler is the function called for incoming OscMessages that match 'address'.
-func (s *Server) Handle(addr string, handler HandlerFunc) error {
-	if s.Dispatcher == nil {
-		s.Dispatcher = NewOscDispatcher()
-	}
-	return s.Dispatcher.AddMsgHandler(addr, handler)
-}
-
 // ListenAndServe retrieves incoming OSC packets and dispatches the retrieved
 // OSC packets.
 func (s *Server) ListenAndServe() error {
 	if s.Dispatcher == nil {
-		s.Dispatcher = NewOscDispatcher()
+		s.Dispatcher = NewStandardDispatcher()
 	}
 
 	ln, err := net.ListenPacket("udp", s.Addr)
@@ -575,8 +564,6 @@ func (s *Server) Serve(c net.PacketConn) error {
 		tempDelay = 0
 		go s.Dispatcher.Dispatch(msg)
 	}
-
-	return nil
 }
 
 // ReceivePacket listens for incoming OSC packets and returns the packet if one is received.
@@ -606,6 +593,7 @@ func (s *Server) readFromConnection(c net.PacketConn) (Packet, error) {
 	return p, nil
 }
 
+// ParsePacket parses the given msg string and returns a Packet
 func ParsePacket(msg string) (Packet, error) {
 	var start int
 	p, err := readPacket(bufio.NewReader(bytes.NewBufferString(msg)), &start, len(msg))

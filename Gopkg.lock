@@ -15,6 +15,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/glynternet/go-osc"
+  packages = ["osc"]
+  revision = "f37bbabe6d3a7f8db7edf50f829e0fa5dc88676b"
+
+[[projects]]
+  branch = "master"
   name = "github.com/glynternet/math"
   packages = ["."]
   revision = "c8f491345bb7174e3a8cd7cffaeade1031b609db"
@@ -66,12 +72,6 @@
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/sander/go-osc"
-  packages = ["osc"]
-  revision = "eff85665dd5a950ab002a1c3841449300e8ae9f3"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -142,6 +142,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c22689d9a4fbeb52d9ab70756a81e4385f02ea5f4578bbb3c02e4c89d560f3a5"
+  inputs-digest = "748514de1e1df78b160092d2004761ab8f8ae1b894990b18282a1f2c943e99c2"
   solver-name = "gps-cdcl"
   solver-version = 1
