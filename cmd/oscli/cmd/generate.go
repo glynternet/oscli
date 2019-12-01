@@ -73,17 +73,15 @@ The messages will be sent to the given address.`,
 
 				// TODO: the third argument to this could be a ticker or something?
 				msgCh := iosc.Generate(context.TODO(), genFn, wave.Frequency(msgFreq).Period())
-				for {
-					select {
-					case msg := <-msgCh:
-						err := client.Send(msg)
-						if err != nil {
-							logger.Print(errors.Wrap(err, "sending message to client"))
-							continue
-						}
-						logger.Printf("Message (%+v) sent to client at %s:%d", msg, client.IP(), client.Port())
+				for msg := range msgCh {
+					err := client.Send(msg)
+					if err != nil {
+						logger.Print(errors.Wrap(err, "sending message to client"))
+						continue
 					}
+					logger.Printf("Message (%+v) sent to client at %s:%d", msg, client.IP(), client.Port())
 				}
+				return nil
 			},
 		}
 	)
