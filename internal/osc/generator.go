@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/sander/go-osc/osc"
+	"github.com/glynternet/go-osc/osc"
 )
 
 // Generate will call the MsgGenFunc periodically after every period given by

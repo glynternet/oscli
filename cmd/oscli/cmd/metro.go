@@ -6,11 +6,11 @@ import (
 	"io"
 	"log"
 
+	"github.com/glynternet/go-osc/osc"
 	osc3 "github.com/glynternet/oscli/internal/osc"
 	osc2 "github.com/glynternet/oscli/pkg/osc"
 	"github.com/glynternet/oscli/pkg/wave"
 	"github.com/pkg/errors"
-	"github.com/sander/go-osc/osc"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
