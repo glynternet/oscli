@@ -31,13 +31,13 @@ func Generate(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 		waveFreq   float64
 
 		cmd = &cobra.Command{
-			Use:   "generate [ADDRESS] [MESSAGE]...",
+			Use:   "generate ADDRESS [ ARGS... ]",
 			Short: "generate a stream of osc messages",
 			Long: `generate a stream of osc messages
 
 Generate an osc signal with values ranging from 0 to 1 as a sin wave.
 The messages will be sent to the given address.`,
-			Args: cobra.MinimumNArgs(2),
+			Args: cobra.MinimumNArgs(1),
 			RunE: func(cmd *cobra.Command, args []string) error {
 				msgAddr, err := osc.CleanAddress(args[0])
 				if err != nil {
