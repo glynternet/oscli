@@ -71,6 +71,7 @@ The messages will be sent to the given address.`,
 
 				genFn := models.NowSinNormalised(msgAddr, staticArgs, waveFreq)
 
+				logger.Printf("Generating and sending to %s:%d", host, remotePort)
 				// TODO: the third argument to this could be a ticker or something?
 				msgCh := iosc.Generate(context.TODO(), genFn, wave.Frequency(msgFreq).Period())
 				for msg := range msgCh {
