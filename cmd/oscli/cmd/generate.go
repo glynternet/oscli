@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 
-	hosc "github.com/glynternet/go-osc/osc"
 	iosc "github.com/glynternet/oscli/internal/osc"
 	"github.com/glynternet/oscli/models"
 	"github.com/glynternet/oscli/pkg/osc"
@@ -44,15 +43,10 @@ The messages will be sent to the given address.`,
 					return errors.Wrap(err, "parsing OSC message address")
 				}
 
-				host, err := initRemoteHost(localMode, remoteHost)
+				client, host, err := initRemoteClient(localMode, remoteHost, int(remotePort))
 				if err != nil {
 					return errors.Wrap(err, "initialising host")
 				}
-
-				client := hosc.NewClient(
-					host,
-					int(remotePort),
-				)
 
 				if msgFreq <= 0 {
 					return fmt.Errorf("%s must be positive, received %f", keyMsgFrequency, msgFreq)

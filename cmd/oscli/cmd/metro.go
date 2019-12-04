@@ -34,15 +34,10 @@ func Metro(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 					return errors.Wrap(err, "parsing OSC message address")
 				}
 
-				host, err := initRemoteHost(localMode, remoteHost)
+				client, _, err := initRemoteClient(localMode, remoteHost, int(remotePort))
 				if err != nil {
 					return errors.Wrap(err, "initialising host")
 				}
-
-				client := osc.NewClient(
-					host,
-					int(remotePort),
-				)
 
 				if msgFreq <= 0 {
 					return fmt.Errorf("%s must be positive, received %f", keyMsgFrequency, msgFreq)
