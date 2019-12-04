@@ -21,12 +21,10 @@ func Send(_ *log.Logger, _ io.Writer, parent *cobra.Command) error {
 		asBlob     bool
 
 		cmdSend = &cobra.Command{
-			Use:   "send",
+			Use:   "send ADDRESS [ ARGS... ]",
 			Short: "send a single OSC message",
+			Args:  cobra.MinimumNArgs(1),
 			RunE: func(cmd *cobra.Command, args []string) error {
-				if len(args) < 2 {
-					return fmt.Errorf("expects at least 2 arguments, address and message parts. Received %d", len(args))
-				}
 				msgAddr, err := osc.CleanAddress(args[0])
 				if err != nil {
 					return errors.Wrap(err, "parsing OSC message address")
@@ -39,12 +37,14 @@ func Send(_ *log.Logger, _ io.Writer, parent *cobra.Command) error {
 
 				msg := osc2.NewMessage(msgAddr)
 				parse := getParser(asBlob)
-				for _, val := range args[1:] {
-					app, err := parse(val)
-					if err != nil {
-						return errors.Wrap(err, "parsing message argument")
+				if len(args) > 1 {
+					for _, val := range args[1:] {
+						app, err := parse(val)
+						if err != nil {
+							return errors.Wrap(err, "parsing message argument")
+						}
+						msg.Append(app)
 					}
-					msg.Append(app)
 				}
 
 				if err := client.Send(msg); err != nil {

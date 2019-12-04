@@ -30,7 +30,8 @@ func Monitor(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 		cmd = &cobra.Command{
 			Use:   "monitor",
 			Short: "monitor incoming OSC messages",
-			RunE: func(cmd *cobra.Command, args []string) error {
+			Args:  cobra.NoArgs,
+			RunE: func(cmd *cobra.Command, _ []string) error {
 				if !noInput {
 					fmt.Println(`Press "q" then enter to exit`)
 					go startQuitterReader(bufio.NewReader(os.Stdin))
