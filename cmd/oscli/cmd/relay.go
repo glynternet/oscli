@@ -29,7 +29,8 @@ func Relay(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 		relayCmd = &cobra.Command{
 			Use:   "relay",
 			Short: "listen and relay osc messages",
-			RunE: func(cmd *cobra.Command, args []string) error {
+			Args:  cobra.NoArgs,
+			RunE: func(cmd *cobra.Command, _ []string) error {
 				if listenHost == forwardHost && listenPort == forwardPort {
 					return errors.New("cannot forward to listen address: forward loop")
 				}

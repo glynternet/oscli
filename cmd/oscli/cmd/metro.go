@@ -25,9 +25,9 @@ func Metro(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 		localMode  bool
 
 		cmd = &cobra.Command{
-			Use:   "metro [ADDRESS] [MESSAGE]...",
+			Use:   "metro ADDRESS [ ARGS... ]",
 			Short: "generate a ticker of the same OSC message",
-			Args:  cobra.MinimumNArgs(2),
+			Args:  cobra.MinimumNArgs(1),
 			RunE: func(cmd *cobra.Command, args []string) error {
 				msgAddr, err := osc2.CleanAddress(args[0])
 				if err != nil {
