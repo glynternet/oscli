@@ -32,13 +32,11 @@ func Send(_ *log.Logger, _ io.Writer, parent *cobra.Command) error {
 					return errors.Wrap(err, "parsing OSC message address")
 				}
 
-				host, err := initRemoteHost(localMode, remoteHost)
+				client, host, err := initRemoteClient(localMode, remoteHost, int(remotePort))
 				if err != nil {
 					return errors.Wrap(err, "getting remote host")
 				}
 
-				port := int(remotePort)
-				client := osc2.NewClient(host, port)
 				msg := osc2.NewMessage(msgAddr)
 				parse := getParser(asBlob)
 				for _, val := range args[1:] {
@@ -52,7 +50,7 @@ func Send(_ *log.Logger, _ io.Writer, parent *cobra.Command) error {
 				if err := client.Send(msg); err != nil {
 					return errors.Wrapf(err, "sending msg:%v using client:%v", *msg, *client)
 				}
-				addr := fmt.Sprintf("%s:%d", host, port)
+				addr := fmt.Sprintf("%s:%d", host, int(remotePort))
 				fmt.Printf("sending to %s: %v\n", addr, msg)
 				return nil
 			},
