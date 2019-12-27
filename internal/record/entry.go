@@ -63,6 +63,18 @@ type entryJSONAlias struct {
 
 type Entries []Entry
 
+func (es Entries) Len() int {
+	return len(es)
+}
+
+func (es Entries) Less(i, j int) bool {
+	return es[i].Duration < es[j].Duration
+}
+
+func (es Entries) Swap(i, j int) {
+	es[i], es[j] = es[j], es[i]
+}
+
 func (es *Entries) add(e Entry) {
 	*es = append(*es, e)
 }
