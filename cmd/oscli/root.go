@@ -15,14 +15,14 @@ import (
 func buildCmdTree(logger log.Logger, out io.Writer, rootCmd *cobra.Command) {
 	rootCmd.AddCommand(pkgcmd.NewBashCompletion(rootCmd, out))
 	for _, addCmd := range []func(log.Logger, io.Writer, *cobra.Command) error{
-		file.Combine,
+		cmd.File,
 		cmd.Generate,
 		cmd.Metro,
 		cmd.Monitor,
-		file.Play,
-		file.Record,
 		cmd.Relay,
 		cmd.Send,
+		file.Play,
+		file.Record,
 	} {
 		err := addCmd(logger, out, rootCmd)
 		if err != nil {
