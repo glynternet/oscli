@@ -37,6 +37,7 @@ func Play(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 				if err != nil {
 					return errors.Wrapf(err, "reading recording from file:%s", oscFile)
 				}
+				logger.Printf("Messages read from %s\n", oscFile)
 
 				logger.Printf("Replaying OSC messages")
 				addr := fmt.Sprintf("%s:%d", host, remotePort)
