@@ -18,18 +18,21 @@ func Play(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 		localMode  bool
 		remoteHost string
 		remotePort uint
-		oscFile    string
 
 		cmd = &cobra.Command{
 			Use:   "play",
 			Short: "play a recorded osc file",
-			Args:  cobra.NoArgs,
-			RunE: func(cmd *cobra.Command, _ []string) error {
+			Args:  cobra.MaximumNArgs(1),
+			RunE: func(cmd *cobra.Command, args []string) error {
 				client, host, err := icmd.ResolveRemoteClient(localMode, remoteHost, int(remotePort))
 				if err != nil {
 					return errors.Wrap(err, "getting remote host")
 				}
 
+				oscFile := defaultRecordFile
+				if len(args) == 1 {
+					oscFile = args[0]
+				}
 				r, err := readFromFile(logger, oscFile)
 				if err != nil {
 					return errors.Wrapf(err, "reading recording from file:%s", oscFile)
@@ -54,6 +57,5 @@ func Play(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 	icmd.FlagRemoteHost(cmd, &remoteHost)
 	icmd.FlagRemotePort(cmd, &remotePort)
 	icmd.FlagLocalMode(cmd, &localMode)
-	cmd.Flags().StringVar(&oscFile, "osc-file", defaultRecordFile, "recorded osc file")
 	return errors.Wrap(viper.BindPFlags(cmd.Flags()), "binding pflags")
 }
