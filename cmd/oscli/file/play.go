@@ -1,13 +1,11 @@
-package cmd
+package file
 
 import (
 	"fmt"
 	"io"
-	"os"
 
-	osc2 "github.com/glynternet/go-osc/osc"
+	"github.com/glynternet/go-osc/osc"
 	icmd "github.com/glynternet/oscli/internal/cmd"
-	"github.com/glynternet/oscli/internal/record"
 	"github.com/glynternet/pkg/log"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -46,7 +44,7 @@ func Play(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 					log.KV{K: "address", V: addr}); err != nil {
 					return errors.Wrap(err, "writing log message")
 				}
-				r.Entries.Play(func(_ int, p osc2.Packet) {
+				r.Entries.Play(func(_ int, p osc.Packet) {
 					if sErr := client.Send(p); sErr != nil {
 						_ = logger.Log(
 							log.Message("Error sending message to client"),
@@ -65,24 +63,4 @@ func Play(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 	icmd.FlagLocalMode(cmd, &localMode)
 	cmd.Flags().StringVar(&oscFile, "osc-file", defaultRecordFile, "recorded osc file")
 	return errors.Wrap(viper.BindPFlags(cmd.Flags()), "binding pflags")
-}
-
-func readFromFile(logger log.Logger, oscFile string) (record.Recording, error) {
-	f, err := os.OpenFile(oscFile, os.O_RDONLY, 0400)
-	if err != nil {
-		return record.Recording{}, errors.Wrap(err, "opening file")
-	}
-
-	var recording record.Recording
-	_, err = recording.ReadFrom(f)
-	err = errors.Wrap(err, "reading recording from file")
-	cErr := errors.Wrap(f.Close(), "closing file")
-	if err == nil {
-		return recording, cErr
-	}
-	if cErr != nil {
-		_ = logger.Log(log.Message("Error closing file"),
-			log.Error(cErr))
-	}
-	return recording, err
 }
