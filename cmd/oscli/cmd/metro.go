@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
 
 	"github.com/glynternet/go-osc/osc"
-	osc3 "github.com/glynternet/oscli/internal/osc"
+	icmd "github.com/glynternet/oscli/internal/cmd"
+	iosc "github.com/glynternet/oscli/internal/osc"
 	osc2 "github.com/glynternet/oscli/pkg/osc"
 	"github.com/glynternet/oscli/pkg/wave"
 	"github.com/pkg/errors"
@@ -34,13 +34,13 @@ func Metro(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 					return errors.Wrap(err, "parsing OSC message address")
 				}
 
-				client, _, err := initRemoteClient(localMode, remoteHost, int(remotePort))
+				client, _, err := icmd.ResolveRemoteClient(localMode, remoteHost, int(remotePort))
 				if err != nil {
 					return errors.Wrap(err, "initialising host")
 				}
 
-				if msgFreq <= 0 {
-					return fmt.Errorf("%s must be positive, received %f", keyMsgFrequency, msgFreq)
+				if err := icmd.VerifyFlagMessageFrequency(msgFreq); err != nil {
+					return errors.Wrap(err, "verifying message frequency")
 				}
 
 				parse := getParser(asBlob)
@@ -60,7 +60,7 @@ func Metro(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 				}
 
 				// TODO: the third argument to this could be a ticker or something?
-				msgCh := osc3.Generate(context.TODO(), genFn, wave.Frequency(msgFreq).Period())
+				msgCh := iosc.Generate(context.TODO(), genFn, wave.Frequency(msgFreq).Period())
 				for {
 					select {
 					case msg := <-msgCh:
@@ -77,10 +77,10 @@ func Metro(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 	)
 
 	parent.AddCommand(cmd)
-	flagLocalMode(cmd, &localMode)
-	flagRemoteHost(cmd, &remoteHost)
-	flagRemotePort(cmd, &remotePort)
-	flagMessageFrequency(cmd, &msgFreq)
-	flagAsBlob(cmd, &asBlob)
+	icmd.FlagLocalMode(cmd, &localMode)
+	icmd.FlagRemoteHost(cmd, &remoteHost)
+	icmd.FlagRemotePort(cmd, &remotePort)
+	icmd.FlagMessageFrequency(cmd, &msgFreq)
+	icmd.FlagAsBlob(cmd, &asBlob)
 	return errors.Wrap(viper.BindPFlags(cmd.Flags()), "binding pflags")
 }
