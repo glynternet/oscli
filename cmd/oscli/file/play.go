@@ -37,7 +37,10 @@ func Play(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 				if err != nil {
 					return errors.Wrapf(err, "reading recording from file:%s", oscFile)
 				}
-				logger.Printf("Messages read from %s\n", oscFile)
+				if err := logger.Log(log.Message("Messages read from file"),
+					log.KV{K: "path", V: oscFile}); err != nil {
+					return errors.Wrap(err, "writing log message")
+				}
 
 				if err := logger.Log(log.Message("Replaying OSC messages")); err != nil {
 					return errors.Wrap(err, "writing log message")
