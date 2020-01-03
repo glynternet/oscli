@@ -37,6 +37,10 @@ func Record(logger log.Logger, w io.Writer, parent *cobra.Command) error {
 				if _, err := os.Stat(output); !os.IsNotExist(err) {
 					return fmt.Errorf("file already exists at %s", output)
 				}
+				wc, err := fileCreatingWriteCloser(logger, output)
+				if err != nil {
+					return errors.Wrapf(err, "creating new WriterCloser for output:%s", output)
+				}
 				ctx, cancel := internal.ContextWithSignalCancels(context.Background(),
 					syscall.SIGINT, syscall.SIGTERM)
 				defer cancel()
@@ -54,14 +58,11 @@ func Record(logger log.Logger, w io.Writer, parent *cobra.Command) error {
 					log.KV{K: "address", V: addr}); err != nil {
 					return errors.Wrap(err, "writing log message")
 				}
-				if err := writeToFile(logger, r, output); err != nil {
-					return err
+				if err := writeRecording(logger, r, wc); err != nil {
+					return errors.Wrap(err, "writing recording")
 				}
-				if err := logger.Log(log.Message("Recording file written"),
-					log.KV{K: "output", V: output}); err != nil {
-					return errors.Wrap(err, "writing log message")
-				}
-				return nil
+				return errors.Wrap(logger.Log(log.Message("Finished writing"),
+					log.KV{K: "output", V: output}), "writing log message")
 			},
 		}
 	)
