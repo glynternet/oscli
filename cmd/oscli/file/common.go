@@ -1,6 +1,7 @@
 package file
 
 import (
+	"io"
 	"log"
 	"os"
 
@@ -27,20 +28,44 @@ func readFromFile(logger *log.Logger, oscFile string) (record.Recording, error) 
 	return recording, err
 }
 
-func writeToFile(logger *log.Logger, r record.Recording, path string) error {
-	file, err := os.Create(path)
-	if err != nil {
-		return errors.Wrapf(err, "creating file at %s", path)
-	}
-	logger.Printf("Writing to file at %s", path)
-	_, err = r.WriteTo(file)
-	err = errors.Wrap(err, "writing recording to writer")
-	cErr := errors.Wrap(file.Close(), "closing file")
-	if err == nil {
+func writeRecording(logger *log.Logger, r record.Recording, wc io.WriteCloser) error {
+	_, wErr := r.WriteTo(wc)
+	wErr = errors.Wrap(wErr, "writing recording to WriteCloser")
+	cErr := errors.Wrap(wc.Close(), "closing WriteCloser")
+	if wErr == nil {
 		return cErr
 	}
 	if cErr != nil {
 		logger.Println(cErr)
 	}
-	return err
+	return wErr
+}
+
+// fileCreatingWriteCloser creates a new file and provides a WriteCloser implementation that will write and log to it when called
+func fileCreatingWriteCloser(logger *log.Logger, path string) (io.WriteCloser, error) {
+	file, err := os.Create(path)
+	if err != nil {
+		return nil, errors.Wrapf(err, "creating file at %s", path)
+	}
+	return &loggingFileWriteCloser{
+		path:   path,
+		file:   file,
+		logger: logger,
+	}, nil
+}
+
+type loggingFileWriteCloser struct {
+	// path can be retrieved from create os.File reference but leaving it here for convenience
+	path   string
+	file   *os.File
+	logger *log.Logger
+}
+
+func (l *loggingFileWriteCloser) Write(p []byte) (n int, err error) {
+	l.logger.Printf("Writing to file at %s", l.path)
+	return l.file.Write(p)
+}
+
+func (l *loggingFileWriteCloser) Close() error {
+	return errors.Wrap(l.file.Close(), "closing file")
 }
