@@ -15,8 +15,11 @@ func readFromFile(logger *log.Logger, oscFile string) (record.Recording, error) 
 		return record.Recording{}, errors.Wrap(err, "opening file")
 	}
 
+	logger.Print("file opened")
 	var recording record.Recording
 	_, err = recording.ReadFrom(f)
+	logger.Print("file read")
+
 	err = errors.Wrap(err, "reading recording from file")
 	cErr := errors.Wrap(f.Close(), "closing file")
 	if err == nil {
@@ -28,10 +31,10 @@ func readFromFile(logger *log.Logger, oscFile string) (record.Recording, error) 
 	return recording, err
 }
 
-func writeToWriteCloser(r io.WriterTo, wc io.WriteCloser) (error, error) {
+func writeToWriteCloser(r io.WriterTo, wc io.WriteCloser) []error {
 	_, wErr := r.WriteTo(wc)
-	return errors.Wrap(wErr, "writing to WriteCloser"),
-		errors.Wrap(wc.Close(), "closing WriteCloser")
+	return []error{errors.Wrap(wErr, "writing to WriteCloser"),
+		errors.Wrap(wc.Close(), "closing WriteCloser")}
 }
 
 func catchFirstLogOthers(logger *log.Logger, errs ...error) error {

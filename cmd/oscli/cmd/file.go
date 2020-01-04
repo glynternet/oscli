@@ -17,6 +17,7 @@ func File(logger *log.Logger, w io.Writer, parent *cobra.Command) error {
 	}
 
 	for _, subcommand := range []func(*log.Logger, io.Writer, *cobra.Command) error{
+		file.Clip,
 		file.Combine,
 		file.Play,
 		file.Record,

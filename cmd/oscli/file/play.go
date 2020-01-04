@@ -46,6 +46,7 @@ func Play(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 					if sErr := client.Send(p); sErr != nil {
 						logger.Printf("Error sending message to client: %+v", sErr)
 					}
+					logger.Printf("message sent:%s", p)
 				})
 
 				logger.Println("Finished playing")
