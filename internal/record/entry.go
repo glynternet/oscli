@@ -32,7 +32,7 @@ func (e Entry) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// UnmarshalJSON  unmarshals a given Entry from JSON format
+// UnmarshalJSON unmarshals a given Entry from JSON format
 func (e *Entry) UnmarshalJSON(data []byte) error {
 	var alias entryJSONAlias
 	err := json.Unmarshal(data, &alias)
