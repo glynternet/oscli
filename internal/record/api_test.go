@@ -21,13 +21,13 @@ func TestAPI(t *testing.T) {
 	require.NoError(t, err)
 
 	expected := record.Recording{
-		Schema: "v0.1.0",
-		Entries: record.Entries{
-			{Duration: 9783662815, Packet: osc.NewMessage("/zoop", "woop", int32(1))},
-			{Duration: 21553480721, Packet: osc.NewMessage("/zoop", "woop", float32(0.5))},
-			{Duration: 26755783749, Packet: osc.NewMessage("/zoop", "woop", "soup")},
-		},
-	}
+		Data: record.RecordingData{
+			Entries: record.Entries{
+				{Duration: 9783662815, Packet: osc.NewMessage("/zoop", "woop", int32(1))},
+				{Duration: 21553480721, Packet: osc.NewMessage("/zoop", "woop", float32(0.5))},
+				{Duration: 26755783749, Packet: osc.NewMessage("/zoop", "woop", "soup")},
+			},
+		}}
 
 	assertEqualRecording(t, expected, r)
 
@@ -38,15 +38,14 @@ func TestAPI(t *testing.T) {
 }
 
 func assertEqualRecording(t *testing.T, expected, actual record.Recording) {
-	assert.Equal(t, expected.Schema, actual.Schema, "expected equal recording schemas")
-	assert.Equal(t, len(expected.Entries), len(actual.Entries), "expected equal length entries")
-	for i := range expected.Entries {
-		assert.Equal(t, expected.Entries[i].Duration, actual.Entries[i].Duration)
+	assert.Equal(t, len(expected.Data.Entries), len(actual.Data.Entries), "expected equal length entries")
+	for i := range expected.Data.Entries {
+		assert.Equal(t, expected.Data.Entries[i].Duration, actual.Data.Entries[i].Duration)
 		// We don't support anything other than messages just yet
-		require.IsType(t, &osc.Message{}, expected.Entries[i].Packet)
-		require.IsType(t, &osc.Message{}, actual.Entries[i].Packet)
-		expectedArgs := expected.Entries[i].Packet.(*osc.Message).Arguments
-		actualArgs := actual.Entries[i].Packet.(*osc.Message).Arguments
+		require.IsType(t, &osc.Message{}, expected.Data.Entries[i].Packet)
+		require.IsType(t, &osc.Message{}, actual.Data.Entries[i].Packet)
+		expectedArgs := expected.Data.Entries[i].Packet.(*osc.Message).Arguments
+		actualArgs := actual.Data.Entries[i].Packet.(*osc.Message).Arguments
 		for j := range expectedArgs {
 			assert.Equal(t, expectedArgs[j], actualArgs[j])
 		}

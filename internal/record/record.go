@@ -3,6 +3,7 @@ package record
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"time"
 
@@ -15,19 +16,50 @@ import (
 var version = "v0.1.0"
 
 type Recording struct {
-	Schema  string  `json:"schema"`
+	Data RecordingData `json:"data"`
+}
+
+type RecordingData struct {
 	Entries Entries `json:"entries"`
 }
 
-func (rd Recording) entryCount() int {
-	return rd.Entries.Len()
+func (rd Recording) MarshalJSON() ([]byte, error) {
+	return json.Marshal(serialisedRecording{
+		Schema: version,
+		Data:   rd.Data,
+	})
 }
+
+func (rd *Recording) UnmarshalJSON(bs []byte) error {
+	var sr serialisedRecording
+	if err := json.Unmarshal(bs, &sr); err != nil {
+		return errors.Wrap(err, "decoding into intermediate recording type")
+	}
+	if sr.Schema != version {
+		return UnsupportedSchemaError(sr.Schema)
+	}
+	*rd = Recording{Data: sr.Data}
+	return nil
+}
+
+type serialisedRecording struct {
+	Schema string        `json:"schema"`
+	Data   RecordingData `json:"data"`
+}
+
+func (rd Recording) entryCount() int {
+	return rd.Data.Entries.Len()
+}
+
 func (rd Recording) WriteTo(w io.Writer) (int64, error) {
-	return 0, json.NewEncoder(w).Encode(&rd)
+	return 0, json.NewEncoder(w).Encode(&serialisedRecording{
+		Schema: version,
+		Data:   rd.Data,
+	})
 }
 
 func (rd *Recording) ReadFrom(r io.Reader) (int64, error) {
-	return 0, json.NewDecoder(r).Decode(rd)
+	return 0, json.NewDecoder(r).Decode(&rd)
 }
 
 func Record(ctx context.Context, logger log.Logger, addr string) (Recording, error) {
@@ -56,7 +88,13 @@ func (r recorder) record(ctx context.Context, logger log.Logger) (Recording, err
 			log.Error(err))
 	})
 	return Recording{
-		Schema:  version,
-		Entries: recorded,
+		Data: RecordingData{Entries: recorded},
 	}, errors.Wrap(err, "receiving packets")
+}
+
+// UnsupportedSchemaError is the error type returned when a Recording with an unsupported schema is encountered
+type UnsupportedSchemaError string
+
+func (us UnsupportedSchemaError) Error() string {
+	return fmt.Sprintf("invalid schema: %s", string(us))
 }

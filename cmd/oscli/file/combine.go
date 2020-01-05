@@ -31,7 +31,7 @@ func Combine(logger log.Logger, w io.Writer, parent *cobra.Command) error {
 						log.KV{K: "path", V: f}); err != nil {
 						return errors.Wrap(err, "writing log message")
 					}
-					ess = append(ess, r.Entries)
+					ess = append(ess, r.Data.Entries)
 				}
 
 				combined := record.Combine(ess...)
@@ -43,7 +43,7 @@ func Combine(logger log.Logger, w io.Writer, parent *cobra.Command) error {
 				if err != nil {
 					return errors.Wrapf(err, "creating new WriterCloser for output:%s", output)
 				}
-				if err := writeRecording(logger, record.Recording{Entries: combined}, wc); err != nil {
+				if err := writeRecording(logger, record.Recording{Data: record.RecordingData{Entries: combined}}, wc); err != nil {
 					return errors.Wrapf(err, "writing recording to file:%s", output)
 				}
 

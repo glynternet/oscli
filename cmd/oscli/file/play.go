@@ -51,7 +51,7 @@ func Play(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 					log.KV{K: "address", V: addr}); err != nil {
 					return errors.Wrap(err, "writing log message")
 				}
-				r.Entries.Play(func(_ int, p osc.Packet) {
+				r.Data.Entries.Play(func(_ int, p osc.Packet) {
 					if sErr := client.Send(p); sErr != nil {
 						_ = logger.Log(
 							log.Message("Error sending message to client"),
