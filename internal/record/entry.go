@@ -86,7 +86,8 @@ func (es *Entries) add(e Entry) {
 	*es = append(*es, e)
 }
 
-func (es Entries) forEach(fn func(int, Entry)) {
+// Call the function, fn, on each Entry
+func (es Entries) ForEach(fn func(int, Entry)) {
 	for i, e := range es {
 		fn(i, e)
 	}
