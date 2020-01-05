@@ -96,7 +96,7 @@ func generateEntries(totalTime, period time.Duration) Entries {
 // the set of replayed times that were recorded when the entries were replayed
 func getDiffs(es Entries, replayed []time.Duration) durationstats.Durations {
 	var diffs durationstats.Durations
-	es.forEach(func(i int, e Entry) {
+	es.ForEach(func(i int, e Entry) {
 		diffs = append(diffs, replayed[i]-es[i].Duration)
 	})
 	return diffs
