@@ -20,7 +20,7 @@ type Recording struct {
 }
 
 func (rd Recording) entryCount() int {
-	return rd.Entries.Count()
+	return rd.Entries.Len()
 }
 func (rd Recording) WriteTo(w io.Writer) (int64, error) {
 	return 0, json.NewEncoder(w).Encode(&rd)
