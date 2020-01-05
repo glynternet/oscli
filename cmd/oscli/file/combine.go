@@ -21,27 +21,24 @@ func Combine(logger *log.Logger, w io.Writer, parent *cobra.Command) error {
 			Short: "combine multiple a osc files into a single file",
 			Args:  cobra.MinimumNArgs(1),
 			RunE: func(cmd *cobra.Command, oscFiles []string) error {
-				var rs []record.Recording
+				var ess []record.Entries
 				for _, f := range oscFiles {
 					r, err := readFromFile(logger, f)
 					if err != nil {
 						return errors.Wrapf(err, "reading recording from file:%s", f)
 					}
 					logger.Printf("Recording read from %s\n", f)
-					rs = append(rs, r)
+					ess = append(ess, r.Entries)
 				}
 
-				combined, err := record.Combine(rs...)
-				if err != nil {
-					return errors.Wrap(err, "combining recordings")
-				}
-				logger.Print("Recordings combined.")
+				combined := record.Combine(ess...)
+				logger.Print("Entries combined.")
 
 				wc, err := fileCreatingWriteCloser(logger, output)
 				if err != nil {
 					return errors.Wrapf(err, "creating new WriterCloser for output:%s", output)
 				}
-				if err := writeRecording(logger, combined, wc); err != nil {
+				if err := writeRecording(logger, record.Recording{Entries: combined}, wc); err != nil {
 					return errors.Wrapf(err, "writing recording to file:%s", output)
 				}
 				logger.Printf("Combined file written to %s", output)
