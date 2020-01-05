@@ -70,7 +70,7 @@ func writeResultsToFile(t *testing.T, filename string, results []result, quantil
 	}
 }
 
-// testPlayerSleep plays the given entries, recording the time at which they are replayed, returning
+// testPlayerSleep plays the given entries, records the time at which they are replayed, returning
 // the Stats produced from the difference between the original play times and the resultant play times.
 func testPlayerSleep(es Entries, sleep time.Duration, quantilePrecision int) durationstats.Stats {
 	var played []time.Duration
