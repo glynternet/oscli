@@ -41,6 +41,10 @@ func writeRecording(logger *log.Logger, r record.Recording, wc io.WriteCloser) e
 	return wErr
 }
 
+func fileForcingWriteCloser(logger *log.Logger, path string) (io.WriteCloser, error) {
+	os.OpenFile()
+}
+
 // fileCreatingWriteCloser creates a new file and provides a WriteCloser implementation that will write and log to it when called
 func fileCreatingWriteCloser(logger *log.Logger, path string) (io.WriteCloser, error) {
 	file, err := os.Create(path)
