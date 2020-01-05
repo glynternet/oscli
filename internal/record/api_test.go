@@ -39,7 +39,7 @@ func TestAPI(t *testing.T) {
 
 func assertEqualRecording(t *testing.T, expected, actual record.Recording) {
 	assert.Equal(t, expected.Schema, actual.Schema, "expected equal recording schemas")
-	assert.Equal(t, len(expected.Entries), len(actual.Entries), "expected equal length arguments")
+	assert.Equal(t, len(expected.Entries), len(actual.Entries), "expected equal length entries")
 	for i := range expected.Entries {
 		assert.Equal(t, expected.Entries[i].Duration, actual.Entries[i].Duration)
 		// We don't support anything other than messages just yet

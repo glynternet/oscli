@@ -1,34 +1,18 @@
 package record
 
 import (
-	"fmt"
 	"sort"
 )
 
-// Combine combines a group of Recordings, sorting all of the entries by their given timestamp in the process
-func Combine(rs ...Recording) (Recording, error) {
-	if len(rs) == 0 {
-		return Recording{Schema: version}, nil
-	}
-	for _, r := range rs {
-		if r.Schema != version {
-			return Recording{}, UnsupportedSchemaError(r.Schema)
-		}
+// Combine combines a group of Entries, sorting them by their given timestamp in the process
+func Combine(ess ...Entries) Entries {
+	if len(ess) == 0 {
+		return Entries{}
 	}
 	var combined Entries
-	for _, r := range rs {
-		combined = append(combined, r.Entries...)
+	for _, es := range ess {
+		combined = append(combined, es...)
 	}
 	sort.Sort(combined)
-	return Recording{
-		Schema:  version,
-		Entries: combined,
-	}, nil
-}
-
-// UnsupportedSchemaError is the error type returned when a Recording wit an unsupported schema is encountered
-type UnsupportedSchemaError string
-
-func (us UnsupportedSchemaError) Error() string {
-	return fmt.Sprintf("invalid schema: %s", string(us))
+	return combined
 }
