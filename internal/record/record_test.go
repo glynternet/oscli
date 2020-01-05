@@ -49,10 +49,10 @@ func TestRecord(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, recorded.entryCount(), decoded.entryCount())
 
-	replayed := replayPackets(logger, decoded.Entries)
+	replayed := replayPackets(logger, decoded.Data.Entries)
 	require.Equal(t, decoded.entryCount(), len(replayed))
 
-	diffs := getDiffs(recorded.Entries, replayed)
+	diffs := getDiffs(recorded.Data.Entries, replayed)
 
 	stats := diffs.Stats(2)
 	assertQuantileTime(t, stats, 0.99, 10*time.Millisecond)

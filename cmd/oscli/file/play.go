@@ -42,7 +42,7 @@ func Play(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 				logger.Printf("Replaying OSC messages")
 				addr := fmt.Sprintf("%s:%d", host, remotePort)
 				logger.Printf("Sending to  address %s", addr)
-				r.Entries.Play(func(_ int, p osc.Packet) {
+				r.Data.Entries.Play(func(_ int, p osc.Packet) {
 					if sErr := client.Send(p); sErr != nil {
 						logger.Printf("Error sending message to client: %+v", sErr)
 					}
