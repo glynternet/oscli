@@ -86,7 +86,7 @@ func generateEntries(totalTime, period time.Duration) Entries {
 	var es Entries
 	var current time.Duration
 	for current <= totalTime {
-		es.add(Entry{Duration: current})
+		es.add(Entry{Elapsed: current})
 		current += period
 	}
 	return es
@@ -97,7 +97,7 @@ func generateEntries(totalTime, period time.Duration) Entries {
 func getDiffs(es Entries, replayed []time.Duration) durationstats.Durations {
 	var diffs durationstats.Durations
 	es.ForEach(func(i int, e Entry) {
-		diffs = append(diffs, replayed[i]-es[i].Duration)
+		diffs = append(diffs, replayed[i]-es[i].Elapsed)
 	})
 	return diffs
 }

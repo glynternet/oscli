@@ -11,7 +11,7 @@ import (
 
 // Entry is a single packet and the elapsed time that it was recorded during a recording
 type Entry struct {
-	time.Duration
+	Elapsed time.Duration `json:"elapsed"`
 	osc.Packet
 }
 
@@ -27,7 +27,7 @@ func (e Entry) MarshalJSON() ([]byte, error) {
 		packet = &encoded
 	}
 	return json.Marshal(entryJSONAlias{
-		Duration:  e.Duration,
+		Elapsed:   e.Elapsed,
 		B64Packet: packet,
 	})
 }
@@ -40,7 +40,7 @@ func (e *Entry) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if alias.B64Packet == nil {
-		e.Duration = alias.Duration
+		e.Elapsed = alias.Elapsed
 		return nil
 	}
 	decoded, err := base64.StdEncoding.DecodeString(*alias.B64Packet)
@@ -53,15 +53,15 @@ func (e *Entry) UnmarshalJSON(data []byte) error {
 		return errors.Wrap(err, "parsing decoded string as osc packet")
 	}
 	*e = Entry{
-		Duration: alias.Duration,
-		Packet:   packet,
+		Elapsed: alias.Elapsed,
+		Packet:  packet,
 	}
 	return nil
 }
 
 type entryJSONAlias struct {
-	time.Duration `json:"duration"`
-	B64Packet     *string `json:"packet"`
+	Elapsed   time.Duration `json:"elapsed"`
+	B64Packet *string       `json:"packet"`
 }
 
 // Entries is a group of Entries
@@ -74,7 +74,7 @@ func (es Entries) Len() int {
 
 // Less returns whether Entry at index i is less than the Entry at index j
 func (es Entries) Less(i, j int) bool {
-	return es[i].Duration < es[j].Duration
+	return es[i].Elapsed < es[j].Elapsed
 }
 
 // Swap swaps the entries at the given indices, i an j.
