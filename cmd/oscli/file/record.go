@@ -58,7 +58,8 @@ func Record(logger log.Logger, w io.Writer, parent *cobra.Command) error {
 					log.KV{K: "address", V: addr}); err != nil {
 					return errors.Wrap(err, "writing log message")
 				}
-				if err := writeRecording(logger, r, wc); err != nil {
+				wErr, cErr := writeToWriteCloser(r, wc)
+				if err := catchFirstLogOthers(logger, wErr, cErr); err != nil {
 					return errors.Wrap(err, "writing recording")
 				}
 				return errors.Wrap(logger.Log(log.Message("Finished writing"),

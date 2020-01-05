@@ -43,7 +43,8 @@ func Combine(logger log.Logger, w io.Writer, parent *cobra.Command) error {
 				if err != nil {
 					return errors.Wrapf(err, "creating new WriterCloser for output:%s", output)
 				}
-				if err := writeRecording(logger, record.Recording{Data: record.RecordingData{Entries: combined}}, wc); err != nil {
+				wErr, cErr := writeToWriteCloser(record.Recording{Data: record.RecordingData{Entries: combined}}, wc)
+				if err := catchFirstLogOthers(logger, wErr, cErr); err != nil {
 					return errors.Wrapf(err, "writing recording to file:%s", output)
 				}
 
