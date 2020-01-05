@@ -51,7 +51,7 @@ func Record(logger *log.Logger, w io.Writer, parent *cobra.Command) error {
 					return errors.Wrap(err, "recording packets")
 				}
 				logger.Println("Finished recording")
-				if err := writeRecording(logger, r, wc); err != nil {
+				if err := catchFirstLogOthers(logger, writeToWriteCloser(r, wc)); err != nil {
 					return errors.Wrap(err, "writing recording")
 				}
 				logger.Print("Finished writing")
