@@ -12,7 +12,7 @@ type player struct {
 
 func (p player) play(es Entries, playEntry func(int, osc.Packet)) {
 	start := time.Now()
-	es.forEach(func(i int, e Entry) {
+	es.ForEach(func(i int, e Entry) {
 		for time.Since(start) < e.Duration {
 			time.Sleep(p.sleepTime)
 		}
