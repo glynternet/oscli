@@ -23,9 +23,9 @@ func TestAPI(t *testing.T) {
 	expected := record.Recording{
 		Data: record.RecordingData{
 			Entries: record.Entries{
-				{Duration: 9783662815, Packet: osc.NewMessage("/zoop", "woop", int32(1))},
-				{Duration: 21553480721, Packet: osc.NewMessage("/zoop", "woop", float32(0.5))},
-				{Duration: 26755783749, Packet: osc.NewMessage("/zoop", "woop", "soup")},
+				{Elapsed: 9783662815, Packet: osc.NewMessage("/zoop", "woop", int32(1))},
+				{Elapsed: 21553480721, Packet: osc.NewMessage("/zoop", "woop", float32(0.5))},
+				{Elapsed: 26755783749, Packet: osc.NewMessage("/zoop", "woop", "soup")},
 			},
 		}}
 
@@ -40,7 +40,7 @@ func TestAPI(t *testing.T) {
 func assertEqualRecording(t *testing.T, expected, actual record.Recording) {
 	assert.Equal(t, len(expected.Data.Entries), len(actual.Data.Entries), "expected equal length entries")
 	for i := range expected.Data.Entries {
-		assert.Equal(t, expected.Data.Entries[i].Duration, actual.Data.Entries[i].Duration)
+		assert.Equal(t, expected.Data.Entries[i].Elapsed, actual.Data.Entries[i].Elapsed)
 		// We don't support anything other than messages just yet
 		require.IsType(t, &osc.Message{}, expected.Data.Entries[i].Packet)
 		require.IsType(t, &osc.Message{}, actual.Data.Entries[i].Packet)

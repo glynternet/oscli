@@ -29,7 +29,7 @@ func TestEntry_JSONLoops(t *testing.T) {
 		{
 			name: "non-zero duration",
 			Entry: Entry{
-				Duration: 1,
+				Elapsed: 1,
 			},
 		},
 		{
@@ -49,8 +49,8 @@ func TestEntry_JSONLoops(t *testing.T) {
 		}, {
 			name: "non-zero all fields",
 			Entry: Entry{
-				Duration: 1,
-				Packet:   bundle,
+				Elapsed: 1,
+				Packet:  bundle,
 			},
 		},
 	} {
