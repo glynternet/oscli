@@ -46,8 +46,8 @@ func entries(times ...time.Duration) record.Entries {
 	var es record.Entries
 	for _, t := range times {
 		es = append(es, record.Entry{
-			Duration: t,
-			Packet:   osc.NewMessage("/" + t.String()),
+			Elapsed: t,
+			Packet:  osc.NewMessage("/" + t.String()),
 		})
 	}
 	return es

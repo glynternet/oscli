@@ -79,8 +79,8 @@ func (r recorder) record(ctx context.Context, logger *log.Logger) (Recording, er
 	err := osc.ReceivePackets(ctx, logger, r.address, func(packet osc2.Packet) {
 		since := time.Since(r.start)
 		recorded.add(Entry{
-			Duration: since,
-			Packet:   packet},
+			Elapsed: since,
+			Packet:  packet},
 		)
 	}, func(err error) {
 		logger.Printf("Error while receiving packet from connection: %v", err)
