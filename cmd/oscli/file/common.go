@@ -30,19 +30,27 @@ func readFromFile(logger log.Logger, oscFile string) (record.Recording, error) {
 	return recording, err
 }
 
-func writeRecording(logger log.Logger, r record.Recording, wc io.WriteCloser) error {
+func writeToWriteCloser(r io.WriterTo, wc io.WriteCloser) (error, error) {
 	_, wErr := r.WriteTo(wc)
-	wErr = errors.Wrap(wErr, "writing recording to WriteCloser")
-	cErr := errors.Wrap(wc.Close(), "closing WriteCloser")
-	if wErr == nil {
-		return cErr
-	}
-	if cErr != nil {
+	return errors.Wrap(wErr, "writing to WriteCloser"),
+		errors.Wrap(wc.Close(), "closing WriteCloser")
+}
+
+func catchFirstLogOthers(logger log.Logger, errs ...error) error {
+	var caught error
+	for _, err := range errs {
+		if err == nil {
+			continue
+		}
+		if caught == nil {
+			caught = err
+			continue
+		}
 		_ = logger.Log(
-			log.Message("Error closing file"),
-			log.Error(cErr))
+			log.Message("Lower priority error occurred"),
+			log.Error(err))
 	}
-	return wErr
+	return caught
 }
 
 // fileCreatingWriteCloser creates a new file and provides a WriteCloser implementation that will write and log to it when called
