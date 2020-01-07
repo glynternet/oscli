@@ -32,7 +32,7 @@ func (rd Recording) MarshalJSON() ([]byte, error) {
 
 func (rd *Recording) UnmarshalJSON(bs []byte) error {
 	var sr serialisedRecording
-	if err := json.Unmarshal(bs, &sr); err != nil {
+	if err := jsonUnmarshalStrictFields(bs, &sr); err != nil {
 		return errors.Wrap(err, "decoding into intermediate recording type")
 	}
 	if sr.Schema != version {
