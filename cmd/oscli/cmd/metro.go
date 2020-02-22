@@ -61,17 +61,15 @@ func Metro(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 
 				// TODO: the third argument to this could be a ticker or something?
 				msgCh := osc3.Generate(context.TODO(), genFn, wave.Frequency(msgFreq).Period())
-				for {
-					select {
-					case msg := <-msgCh:
-						err := client.Send(msg)
-						if err != nil {
-							logger.Print(errors.Wrap(err, "sending message to client"))
-							continue
-						}
-						logger.Printf("Message (%+v) sent to client at %s:%d", msg, client.IP(), client.Port())
+				for msg := range msgCh {
+					err := client.Send(msg)
+					if err != nil {
+						logger.Print(errors.Wrap(err, "sending message to client"))
+						continue
 					}
+					logger.Printf("Message (%+v) sent to client at %s:%d", msg, client.IP(), client.Port())
 				}
+				return nil
 			},
 		}
 	)
