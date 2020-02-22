@@ -1,10 +1,10 @@
-# dubplate version: v0.5.1
+# dubplate version: v0.7.0
 
 OUTBIN ?= $(BUILD_DIR)/$(APP_NAME)
 
 VERSION_VAR ?= main.version
 LDFLAGS = -ldflags "-w -X $(VERSION_VAR)=$(VERSION)"
-GOBUILD_FLAGS ?= -installsuffix cgo -a $(LDFLAGS) -o $(OUTBIN)
+GOBUILD_FLAGS ?= -installsuffix cgo $(LDFLAGS) -o $(OUTBIN)
 GOBUILD_ENVVARS ?= CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH)
 GOBUILD_CMD ?= $(GOBUILD_ENVVARS) go build $(GOBUILD_FLAGS)
 
@@ -14,11 +14,12 @@ dummy:
 binary: $(BUILD_DIR)
 	$(GOBUILD_CMD) ./cmd/$(APP_NAME)
 
-binaries: $(BINARIES)
+binaries: $(COMPONENTS:=-binary)
 
-$(BINARIES):
-	$(MAKE) cmd-all \
-		APP_NAME=$@
+$(COMPONENTS:=-binary):
+	$(MAKE) binary \
+		APP_NAME=$(@:-binary=)
+
 
 test-binary-version-output: VERSION_CMD ?= $(OUTBIN) version
 test-binary-version-output:
