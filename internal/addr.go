@@ -2,7 +2,7 @@ package internal
 
 import (
 	"bufio"
-	"log"
+	"fmt"
 	"os"
 	"strings"
 
@@ -37,7 +37,9 @@ type stringReader interface {
 }
 
 func readRemoteAddress(reader stringReader) (string, error) {
-	log.Println("Please enter the remote address.")
+	if _, err := fmt.Println("Please enter the remote address."); err != nil {
+		return "", errors.Wrap(err, "printing remote address prompt")
+	}
 	addr, err := reader.ReadString('\n')
 	if err != nil {
 		return "", errors.Wrap(err, "reading address from reader string")

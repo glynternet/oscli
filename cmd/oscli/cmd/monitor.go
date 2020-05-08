@@ -5,10 +5,10 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"os"
 
 	"github.com/glynternet/oscli/internal/osc"
+	"github.com/glynternet/pkg/log"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -20,7 +20,7 @@ const (
 )
 
 // Monitor adds a generate command to the parent command
-func Monitor(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
+func Monitor(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 	var (
 		listenHost  string
 		listenPort  uint
