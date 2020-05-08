@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/glynternet/go-osc/osc"
+	icmd "github.com/glynternet/oscli/internal/cmd"
 	osc2 "github.com/glynternet/oscli/internal/osc"
 	"github.com/glynternet/pkg/log"
 	"github.com/pkg/errors"
@@ -61,8 +62,8 @@ func Relay(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 		}
 	)
 	parent.AddCommand(relayCmd)
-	flagListenHost(relayCmd, &listenHost)
-	flagListenPort(relayCmd, &listenPort)
+	icmd.FlagListenHost(relayCmd, &listenHost)
+	icmd.FlagListenPort(relayCmd, &listenPort)
 	relayCmd.Flags().StringVar(&forwardHost, keyForwardHost, "", "forwarding host address")
 	relayCmd.Flags().UintVar(&forwardPort, keyForwardPort, 9000, "forwarding port number")
 	return errors.Wrap(viper.BindPFlags(relayCmd.Flags()), "binding pflags")

@@ -5,6 +5,7 @@ import (
 	"io"
 
 	osc2 "github.com/glynternet/go-osc/osc"
+	icmd "github.com/glynternet/oscli/internal/cmd"
 	"github.com/glynternet/oscli/pkg/osc"
 	"github.com/glynternet/pkg/log"
 	"github.com/pkg/errors"
@@ -30,7 +31,7 @@ func Send(_ log.Logger, _ io.Writer, parent *cobra.Command) error {
 					return errors.Wrap(err, "parsing OSC message address")
 				}
 
-				client, host, err := initRemoteClient(localMode, remoteHost, int(remotePort))
+				client, host, err := icmd.ResolveRemoteClient(localMode, remoteHost, int(remotePort))
 				if err != nil {
 					return errors.Wrap(err, "getting remote host")
 				}
@@ -58,9 +59,9 @@ func Send(_ log.Logger, _ io.Writer, parent *cobra.Command) error {
 	)
 
 	parent.AddCommand(cmdSend)
-	flagRemoteHost(cmdSend, &remoteHost)
-	flagRemotePort(cmdSend, &remotePort)
-	flagLocalMode(cmdSend, &localMode)
-	flagAsBlob(cmdSend, &asBlob)
+	icmd.FlagRemoteHost(cmdSend, &remoteHost)
+	icmd.FlagRemotePort(cmdSend, &remotePort)
+	icmd.FlagLocalMode(cmdSend, &localMode)
+	icmd.FlagAsBlob(cmdSend, &asBlob)
 	return errors.Wrap(viper.BindPFlags(cmdSend.Flags()), "binding pflags")
 }
