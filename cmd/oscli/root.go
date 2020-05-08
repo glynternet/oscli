@@ -3,7 +3,6 @@ package main
 import (
 	"io"
 	"log"
-	"os"
 
 	"github.com/glynternet/oscli/cmd/oscli/cmd"
 	pkgcmd "github.com/glynternet/pkg/cmd"
@@ -13,7 +12,7 @@ import (
 )
 
 func buildCmdTree(logger *log.Logger, out io.Writer, rootCmd *cobra.Command) {
-	rootCmd.AddCommand(pkgcmd.NewBashCompletion(rootCmd, os.Stdout))
+	rootCmd.AddCommand(pkgcmd.NewBashCompletion(rootCmd, out))
 	for _, addCmd := range []func(*log.Logger, io.Writer, *cobra.Command) error{
 		cmd.Generate,
 		cmd.Metro,
