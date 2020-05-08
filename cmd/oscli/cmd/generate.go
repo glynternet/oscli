@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 
 	iosc "github.com/glynternet/oscli/internal/osc"
 	"github.com/glynternet/oscli/models"
 	"github.com/glynternet/oscli/pkg/osc"
 	"github.com/glynternet/oscli/pkg/wave"
+	"github.com/glynternet/pkg/log"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -21,7 +21,7 @@ const (
 )
 
 // Generate adds a generate command to the parent command
-func Generate(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
+func Generate(logger log.Logger, w io.Writer, parent *cobra.Command) error {
 	var (
 		localMode  bool
 		remoteHost string
@@ -65,16 +65,30 @@ The messages will be sent to the given address.`,
 
 				genFn := models.NowSinNormalised(msgAddr, staticArgs, waveFreq)
 
-				logger.Printf("Generating and sending to %s:%d", host, remotePort)
+				remoteKV := log.KV{K: "remote", V: fmt.Sprintf("%s:%d", host, remotePort)}
+				if err := logger.Log(
+					log.Message("Generating and sending messages"),
+					remoteKV); err != nil {
+					return errors.Wrap(err, "printing log message")
+				}
 				// TODO: the third argument to this could be a ticker or something?
 				msgCh := iosc.Generate(context.TODO(), genFn, wave.Frequency(msgFreq).Period())
 				for msg := range msgCh {
 					err := client.Send(msg)
 					if err != nil {
-						logger.Print(errors.Wrap(err, "sending message to client"))
+						_ = logger.Log(
+							log.Message("Error sending message to remote"),
+							log.Error(err),
+							log.KV{K: "oscMessage", V: msg},
+							remoteKV)
 						continue
 					}
-					logger.Printf("Message (%+v) sent to client at %s:%d", msg, client.IP(), client.Port())
+					_ = logger.Log(
+						log.Message("Message sent to remote"),
+						log.Error(err),
+						log.KV{K: "oscMessage", V: msg},
+						remoteKV,
+					)
 				}
 				return nil
 			},

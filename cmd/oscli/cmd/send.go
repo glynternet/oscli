@@ -3,17 +3,17 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"log"
 
 	osc2 "github.com/glynternet/go-osc/osc"
 	"github.com/glynternet/oscli/pkg/osc"
+	"github.com/glynternet/pkg/log"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 // Send adds a generate command to the parent command
-func Send(_ *log.Logger, _ io.Writer, parent *cobra.Command) error {
+func Send(_ log.Logger, _ io.Writer, parent *cobra.Command) error {
 	var (
 		localMode  bool
 		remoteHost string
