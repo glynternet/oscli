@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 
 	"github.com/glynternet/go-osc/osc"
 	osc2 "github.com/glynternet/oscli/internal/osc"
+	"github.com/glynternet/pkg/log"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -19,7 +19,7 @@ const (
 )
 
 // Relay adds a generate command to the parent command
-func Relay(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
+func Relay(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 	var (
 		listenHost  string
 		listenPort  uint
@@ -40,12 +40,20 @@ func Relay(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 				handle := func(p osc.Packet) {
 					printPacket(p)
 					if err := c.Send(p); err != nil {
-						logger.Print(errors.Wrap(err, "forwarding to client"))
+						_ = logger.Log(
+							log.Message("Error forwarding packet"),
+							log.Error(err))
 					}
 				}
 
 				listenAddr := fmt.Sprintf("%s:%d", listenHost, listenPort)
-				logger.Printf("forwarding to %s:%d", forwardHost, forwardPort)
+				remoteAddr := fmt.Sprintf("%s:%d", forwardHost, forwardPort)
+				remoteAddrKV := log.KV{K: "remote", V: remoteAddr}
+				if err := logger.Log(
+					log.Message("Forwarding to remote"),
+					remoteAddrKV); err != nil {
+					return errors.Wrap(err, "logging message")
+				}
 				return errors.Wrap(
 					osc2.ReceivePackets(context.Background(), logger, listenAddr, handle, printError),
 					"receiving packets")

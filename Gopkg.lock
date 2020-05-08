@@ -28,8 +28,20 @@
 [[projects]]
   branch = "develop"
   name = "github.com/glynternet/pkg"
-  packages = ["cmd"]
-  revision = "d7b5c512cb0f783bcbeb95df0880364d72285a64"
+  packages = ["cmd","log"]
+  revision = "ba45570d30beb3a6d3ac88e1ed76e8aa95719da5"
+
+[[projects]]
+  name = "github.com/go-kit/kit"
+  packages = ["log","log/level"]
+  revision = "cc938d52e0cdf4c811ab203f428fcd06f9d9a148"
+  version = "v0.10.0"
+
+[[projects]]
+  name = "github.com/go-logfmt/logfmt"
+  packages = ["."]
+  revision = "3be5f6aae7db841d31dc5e1b3bb7b4cff19200b3"
+  version = "v0.5.0"
 
 [[projects]]
   name = "github.com/hashicorp/hcl"
@@ -142,6 +154,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "748514de1e1df78b160092d2004761ab8f8ae1b894990b18282a1f2c943e99c2"
+  inputs-digest = "1c8626cb5c1d253a23d0d145e81b30f7c95bcb31b394d319268a690f12038ae3"
   solver-name = "gps-cdcl"
   solver-version = 1

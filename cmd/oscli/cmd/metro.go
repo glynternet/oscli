@@ -4,19 +4,19 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 
 	"github.com/glynternet/go-osc/osc"
 	osc3 "github.com/glynternet/oscli/internal/osc"
 	osc2 "github.com/glynternet/oscli/pkg/osc"
 	"github.com/glynternet/oscli/pkg/wave"
+	"github.com/glynternet/pkg/log"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 // Metro adds a generate command to the parent command
-func Metro(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
+func Metro(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 	var (
 		remoteHost string
 		remotePort uint
@@ -64,10 +64,15 @@ func Metro(logger *log.Logger, _ io.Writer, parent *cobra.Command) error {
 				for msg := range msgCh {
 					err := client.Send(msg)
 					if err != nil {
-						logger.Print(errors.Wrap(err, "sending message to client"))
+						_ = logger.Log(
+							log.Message("Error sending message to client"),
+							log.Error(err))
 						continue
 					}
-					logger.Printf("Message (%+v) sent to client at %s:%d", msg, client.IP(), client.Port())
+					_ = logger.Log(
+						log.Message("Message sent to client"),
+						log.KV{K: "oscMessage", V: msg},
+						log.KV{K: "clientAddress", V: fmt.Sprintf("%s:%d", client.IP(), client.Port())})
 				}
 				return nil
 			},

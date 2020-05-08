@@ -2,18 +2,18 @@ package main
 
 import (
 	"io"
-	"log"
+	"os"
 
 	"github.com/glynternet/oscli/cmd/oscli/cmd"
 	pkgcmd "github.com/glynternet/pkg/cmd"
-	"github.com/pkg/errors"
+	"github.com/glynternet/pkg/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-func buildCmdTree(logger *log.Logger, out io.Writer, rootCmd *cobra.Command) {
+func buildCmdTree(logger log.Logger, out io.Writer, rootCmd *cobra.Command) {
 	rootCmd.AddCommand(pkgcmd.NewBashCompletion(rootCmd, out))
-	for _, addCmd := range []func(*log.Logger, io.Writer, *cobra.Command) error{
+	for _, addCmd := range []func(log.Logger, io.Writer, *cobra.Command) error{
 		cmd.Generate,
 		cmd.Metro,
 		cmd.Monitor,
@@ -22,11 +22,17 @@ func buildCmdTree(logger *log.Logger, out io.Writer, rootCmd *cobra.Command) {
 	} {
 		err := addCmd(logger, out, rootCmd)
 		if err != nil {
-			log.Fatal(errors.Wrap(err, "adding subcommand"))
+			_ = logger.Log(
+				log.Message("Error adding subcommand"),
+				log.Error(err))
+			os.Exit(1)
 		}
 	}
-	err := viper.BindPFlags(rootCmd.PersistentFlags())
-	if err != nil {
-		log.Fatal(errors.Wrap(err, "binding PFlags"))
+
+	if err := viper.BindPFlags(rootCmd.PersistentFlags()); err != nil {
+		_ = logger.Log(
+			log.Message("Error binding PFlags"),
+			log.Error(err))
+		os.Exit(1)
 	}
 }
