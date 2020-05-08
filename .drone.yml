@@ -13,13 +13,12 @@ pipeline:
     commands:
       - go test -v -race ./...
 
-# TODO(glynternet): put linter stage back in before big merge"
-#  # drone mounts the root directory of the repository to the container and sets
-#  # it as the working directory
-#  run-linters:
-#    image: golangci/golangci-lint:v1.22.2-alpine
-#    commands:
-#      - golangci-lint run -v
+  # drone mounts the root directory of the repository to the container and sets
+  # it as the working directory
+  run-linters:
+    image: golangci/golangci-lint:v1.22.2-alpine
+    commands:
+      - golangci-lint run -v
 
   build-binaries:
     image: golang:1.15.4
