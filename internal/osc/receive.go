@@ -3,18 +3,18 @@ package osc
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 	"time"
 
 	"github.com/glynternet/go-osc/osc"
+	"github.com/glynternet/pkg/log"
 	"github.com/pkg/errors"
 )
 
 // ReceivePackets will receive all packets at the given address.
 // Successfully received packets will be handled by the PacketHandler.
 // Errors whilst receiving will be handled by the given ErrorHandler.
-func ReceivePackets(ctx context.Context, logger *log.Logger, addr string,
+func ReceivePackets(ctx context.Context, logger log.Logger, addr string,
 	handlePacket PacketHandler,
 	handleReceiveError ErrorHandler,
 ) error {
@@ -32,8 +32,8 @@ func ReceivePackets(ctx context.Context, logger *log.Logger, addr string,
 			if err != nil {
 				return errors.Wrapf(err, "closing connection")
 			}
-			logger.Println("Listen connection closed")
-			return nil
+			return errors.Wrap(logger.Log(log.Message("Listen connection closed")),
+				"writing log line")
 		default:
 			packet, err := srv.ReceivePacket(conn)
 			if err != nil {
