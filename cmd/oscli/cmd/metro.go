@@ -6,7 +6,8 @@ import (
 	"io"
 
 	"github.com/glynternet/go-osc/osc"
-	osc3 "github.com/glynternet/oscli/internal/osc"
+	icmd "github.com/glynternet/oscli/internal/cmd"
+	iosc "github.com/glynternet/oscli/internal/osc"
 	osc2 "github.com/glynternet/oscli/pkg/osc"
 	"github.com/glynternet/oscli/pkg/wave"
 	"github.com/glynternet/pkg/log"
@@ -34,13 +35,13 @@ func Metro(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 					return errors.Wrap(err, "parsing OSC message address")
 				}
 
-				client, _, err := initRemoteClient(localMode, remoteHost, int(remotePort))
+				client, _, err := icmd.ResolveRemoteClient(localMode, remoteHost, int(remotePort))
 				if err != nil {
 					return errors.Wrap(err, "initialising host")
 				}
 
-				if msgFreq <= 0 {
-					return fmt.Errorf("%s must be positive, received %f", keyMsgFrequency, msgFreq)
+				if err := icmd.VerifyFlagMessageFrequency(msgFreq); err != nil {
+					return errors.Wrap(err, "verifying message frequency")
 				}
 
 				parse := getParser(asBlob)
@@ -60,13 +61,15 @@ func Metro(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 				}
 
 				// TODO: the third argument to this could be a ticker or something?
-				msgCh := osc3.Generate(context.TODO(), genFn, wave.Frequency(msgFreq).Period())
+				msgCh := iosc.Generate(context.TODO(), genFn, wave.Frequency(msgFreq).Period())
 				for msg := range msgCh {
 					err := client.Send(msg)
 					if err != nil {
 						_ = logger.Log(
 							log.Message("Error sending message to client"),
-							log.Error(err))
+							log.Error(err),
+							log.KV{K: "oscMessage", V: msg},
+							log.KV{K: "clientAddress", V: fmt.Sprintf("%s:%d", client.IP(), client.Port())})
 						continue
 					}
 					_ = logger.Log(
@@ -80,10 +83,10 @@ func Metro(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 	)
 
 	parent.AddCommand(cmd)
-	flagLocalMode(cmd, &localMode)
-	flagRemoteHost(cmd, &remoteHost)
-	flagRemotePort(cmd, &remotePort)
-	flagMessageFrequency(cmd, &msgFreq)
-	flagAsBlob(cmd, &asBlob)
+	icmd.FlagLocalMode(cmd, &localMode)
+	icmd.FlagRemoteHost(cmd, &remoteHost)
+	icmd.FlagRemotePort(cmd, &remotePort)
+	icmd.FlagMessageFrequency(cmd, &msgFreq)
+	icmd.FlagAsBlob(cmd, &asBlob)
 	return errors.Wrap(viper.BindPFlags(cmd.Flags()), "binding pflags")
 }

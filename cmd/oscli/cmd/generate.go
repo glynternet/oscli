@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	icmd "github.com/glynternet/oscli/internal/cmd"
 	iosc "github.com/glynternet/oscli/internal/osc"
 	"github.com/glynternet/oscli/models"
 	"github.com/glynternet/oscli/pkg/osc"
@@ -16,7 +17,6 @@ import (
 )
 
 const (
-	keyMsgFrequency  = "msg-freq"
 	keyWaveFrequency = "wave-freq"
 )
 
@@ -43,13 +43,13 @@ The messages will be sent to the given address.`,
 					return errors.Wrap(err, "parsing OSC message address")
 				}
 
-				client, host, err := initRemoteClient(localMode, remoteHost, int(remotePort))
+				client, host, err := icmd.ResolveRemoteClient(localMode, remoteHost, int(remotePort))
 				if err != nil {
 					return errors.Wrap(err, "initialising host")
 				}
 
-				if msgFreq <= 0 {
-					return fmt.Errorf("%s must be positive, received %f", keyMsgFrequency, msgFreq)
+				if err := icmd.VerifyFlagMessageFrequency(msgFreq); err != nil {
+					return errors.Wrap(err, "verifying message frequency")
 				}
 
 				var staticArgs []interface{}
@@ -96,10 +96,10 @@ The messages will be sent to the given address.`,
 	)
 
 	parent.AddCommand(cmd)
-	flagLocalMode(cmd, &localMode)
-	flagRemoteHost(cmd, &remoteHost)
-	flagRemotePort(cmd, &remotePort)
-	flagMessageFrequency(cmd, &msgFreq)
+	icmd.FlagLocalMode(cmd, &localMode)
+	icmd.FlagRemoteHost(cmd, &remoteHost)
+	icmd.FlagRemotePort(cmd, &remotePort)
+	icmd.FlagMessageFrequency(cmd, &msgFreq)
 	cmd.Flags().Float64VarP(&waveFreq, keyWaveFrequency, "f", 1, "frequency of generated signal")
 	return errors.Wrap(viper.BindPFlags(cmd.Flags()), "binding pflags")
 }

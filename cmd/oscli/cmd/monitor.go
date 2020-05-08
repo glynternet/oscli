@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 
+	icmd "github.com/glynternet/oscli/internal/cmd"
 	"github.com/glynternet/oscli/internal/osc"
 	"github.com/glynternet/pkg/log"
 	"github.com/pkg/errors"
@@ -48,8 +49,8 @@ func Monitor(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 	)
 
 	parent.AddCommand(cmd)
-	flagListenHost(cmd, &listenHost)
-	flagListenPort(cmd, &listenPort)
+	icmd.FlagListenHost(cmd, &listenHost)
+	icmd.FlagListenPort(cmd, &listenPort)
 	cmd.Flags().BoolVar(&noInput, keyNoInput, false, "turn on no-input mode for when no terminal is available")
 	cmd.Flags().BoolVar(&decodeBlobs, keyDecodeBlob, false, "decode blob values into strings")
 	return errors.Wrap(viper.BindPFlags(cmd.Flags()), "binding pflags")
