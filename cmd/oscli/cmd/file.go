@@ -13,7 +13,7 @@ import (
 func File(logger log.Logger, w io.Writer, parent *cobra.Command) error {
 	var cmd = &cobra.Command{
 		Use:   "file",
-		Short: "record, play and combine files",
+		Short: "commands to work with osc files",
 	}
 
 	for _, subcommand := range []func(log.Logger, io.Writer, *cobra.Command) error{
