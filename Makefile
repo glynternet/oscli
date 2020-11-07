@@ -1,4 +1,4 @@
-BINARIES ?= oscli
+COMPONENTS ?= oscli
 
 include ./dubplate.Makefile
 include ./go.Makefile
