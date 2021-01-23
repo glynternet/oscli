@@ -67,7 +67,7 @@ func Metro(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 					if err != nil {
 						_ = logger.Log(
 							log.Message("Error sending message to client"),
-							log.Error(err),
+							log.ErrorMessage(err),
 							log.KV{K: "oscMessage", V: msg},
 							log.KV{K: "clientAddress", V: fmt.Sprintf("%s:%d", client.IP(), client.Port())})
 						continue

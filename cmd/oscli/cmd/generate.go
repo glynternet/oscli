@@ -78,14 +78,14 @@ The messages will be sent to the given address.`,
 					if err != nil {
 						_ = logger.Log(
 							log.Message("Error sending message to remote"),
-							log.Error(err),
+							log.ErrorMessage(err),
 							log.KV{K: "oscMessage", V: msg},
 							remoteKV)
 						continue
 					}
 					_ = logger.Log(
 						log.Message("Message sent to remote"),
-						log.Error(err),
+						log.ErrorMessage(err),
 						log.KV{K: "oscMessage", V: msg},
 						remoteKV,
 					)
