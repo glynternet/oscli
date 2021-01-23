@@ -43,7 +43,7 @@ func Relay(logger log.Logger, _ io.Writer, parent *cobra.Command) error {
 					if err := c.Send(p); err != nil {
 						_ = logger.Log(
 							log.Message("Error forwarding packet"),
-							log.Error(err))
+							log.ErrorMessage(err))
 					}
 				}
 
